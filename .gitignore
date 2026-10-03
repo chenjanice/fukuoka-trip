@@ -1,0 +1,6 @@
+*
+!index.html
+!.gitignore
+!source/
+!source/thumbs/
+!source/thumbs/*.jpg

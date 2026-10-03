@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>福岡旅遊手冊</title>
+<style>
+  :root {
+    --bg: #F3ECE0;
+    --paper: #FBF7EF;
+    --primary: #C1673F;
+    --primary-dark: #9C4E2E;
+    --primary-tint: #EFDCC9;
+    --ink: #2C2620;
+    --sub-ink: #8A7A68;
+    --border: #E2D5C0;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Serif TC", "Hiragino Mincho ProN", "Yu Mincho",
+                 "游明體", "PMingLiU", "細明體", "STSong", serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #app {
+    max-width: 560px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    padding-bottom: 150px;
+  }
+
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header.top h1 {
+    margin: 0 0 10px;
+    font-size: 1.15rem;
+    letter-spacing: 0.04em;
+    color: var(--primary-dark);
+    font-weight: 700;
+    text-align: center;
+  }
+
+  header.top h1 .sub {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--sub-ink);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  /* 底部導覽列（只剩口袋，已不需切換，隱藏之） */
+  .bottom-nav {
+    display: none;
+  }
+
+  .bottom-nav-inner {
+    display: flex;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 2px 7px;
+    border: none;
+    background: none;
+    color: var(--sub-ink);
+    font-family: inherit;
+    font-size: 0.68rem;
+    line-height: 1.2;
+    cursor: pointer;
+  }
+
+  .nav-btn .nav-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .nav-btn.active {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .search-wrap {
+    position: relative;
+  }
+
+  #search {
+    width: 100%;
+    padding: 10px 34px 10px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-family: inherit;
+    outline: none;
+  }
+
+  #search:focus {
+    border-color: var(--primary);
+  }
+
+  .search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sub-ink);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: none;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  /* 類別列：沿用原本底部導覽列的樣式 */
+  nav.tabs {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 35;
+    display: flex;
+    background: var(--paper);
+    border-top: 1px solid var(--border);
+    /* 寬螢幕時讓按鈕集中在 560px 內 */
+    padding: 0 max(0px, calc((100% - 560px) / 2)) env(safe-area-inset-bottom, 0);
+    box-shadow: 0 -1px 6px rgba(60, 45, 25, 0.06);
+  }
+
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 2px 7px;
+    border: none;
+    background: none;
+    color: var(--sub-ink);
+    font-family: inherit;
+    font-size: 0.68rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .tab-btn .nav-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .tab-btn.active {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  /* 區域篩選列 */
+  .zone-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 16px 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .zone-bar::-webkit-scrollbar { display: none; }
+
+  .zone-chip {
+    flex: 0 0 auto;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--sub-ink);
+    font-family: inherit;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .zone-chip .zone-count {
+    opacity: 0.65;
+    margin-left: 3px;
+  }
+
+  .zone-chip.active {
+    background: var(--primary-tint);
+    border-color: var(--primary);
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 2px;
+    font-size: 0.78rem;
+    color: var(--sub-ink);
+  }
+
+  .status-bar .filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .status-bar .filter-toggle input {
+    accent-color: var(--primary);
+  }
+
+  main {
+    padding: 10px 16px 20px;
+  }
+
+  .section-title {
+    font-size: 0.95rem;
+    color: var(--primary-dark);
+    font-weight: 700;
+    margin: 4px 0 10px;
+    padding-left: 2px;
+    border-left: 4px solid var(--primary);
+    padding-left: 8px;
+  }
+
+  .card {
+    position: relative;
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 18px 118px 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(60, 45, 25, 0.08);
+    transition: opacity 0.15s ease;
+  }
+
+  .card.starred {
+    box-shadow: 0 0 0 1.5px var(--primary), 0 1px 3px rgba(60, 45, 25, 0.08);
+  }
+
+  .card.learned {
+    opacity: 0.55;
+  }
+
+  .card .cat-chip {
+    display: inline-block;
+    font-size: 0.68rem;
+    color: var(--primary-dark);
+    background: var(--primary-tint);
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-bottom: 8px;
+  }
+
+  .card .jp {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+  }
+
+  .card .meta {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--sub-ink);
+  }
+
+  .card .meta .dot {
+    color: var(--border);
+    font-size: 0.7rem;
+  }
+
+  .card .meta .romaji {
+    font-family: "Courier New", monospace;
+    letter-spacing: 0.01em;
+  }
+
+  .card .zh {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 12px;
+    color: var(--ink);
+  }
+
+  .card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .card .tags .tag {
+    font-size: 0.78rem;
+    color: var(--primary-dark);
+    background: var(--primary-tint);
+    border-radius: 999px;
+    padding: 3px 10px;
+  }
+
+  .card .note {
+    font-size: 0.88rem;
+    color: var(--sub-ink);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  /* 口袋卡片：上方縮圖，按鈕浮在圖片上 */
+  .card.place {
+    padding: 0 20px 16px;
+    overflow: hidden;
+  }
+
+  .card.place.no-img {
+    padding: 18px 118px 16px 20px;
+  }
+
+  .place-thumb {
+    display: block;
+    width: calc(100% + 40px);
+    height: 150px;
+    margin: 0 -20px 12px;
+    object-fit: cover;
+    background: var(--primary-tint);
+  }
+
+  .card.place:not(.no-img) .map-link,
+  .card.place:not(.no-img) .star-toggle,
+  .card.place:not(.no-img) .learn-toggle {
+    background-color: var(--paper);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  }
+
+  .card.place:not(.no-img) .map-link,
+  .card.place:not(.no-img):not(.starred) .star-toggle,
+  .card.place:not(.no-img):not(.learned) .learn-toggle {
+    border-color: transparent;
+  }
+
+  .card.place.learned .learn-toggle {
+    background-color: var(--primary);
+  }
+
+  .card .rating {
+    margin-top: 2px;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+  }
+
+  .card .rating .on { color: #e0a526; }
+  .card .rating .off { color: var(--border); }
+
+  .card .desc {
+    font-size: 0.92rem;
+    color: var(--ink);
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+
+  /* 地圖 icon 按鈕：放在星星左邊 */
+  .map-link {
+    position: absolute;
+    top: 16px;
+    right: 84px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .map-link:active {
+    background: var(--primary-tint);
+    border-color: var(--primary);
+  }
+
+  /* 行程卡片沒有星星／打勾，地圖 icon 直接靠右 */
+  .card.sched .map-link,
+  .card.backup .map-link {
+    right: 16px;
+  }
+
+  .learn-toggle,
+  .star-toggle {
+    position: absolute;
+    top: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--border);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .learn-toggle {
+    right: 16px;
+  }
+
+  .learn-toggle::after {
+    content: "✓";
+  }
+
+  .card.learned .learn-toggle {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  .star-toggle {
+    right: 50px;
+    color: var(--sub-ink);
+    font-size: 1rem;
+  }
+
+  .star-toggle::after {
+    content: "☆";
+  }
+
+  .card.starred .star-toggle {
+    border-color: #E0A93A;
+    color: #E0A93A;
+  }
+
+  .card.starred .star-toggle::after {
+    content: "★";
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: var(--sub-ink);
+    font-size: 0.9rem;
+    padding: 40px 10px;
+  }
+
+  /* 行程卡片 */
+  .card.sched {
+    padding: 16px 56px 16px 20px;
+    border-left: 4px solid var(--primary);
+  }
+
+  .card.sched .sched-time {
+    font-family: "Courier New", monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    letter-spacing: 0.02em;
+  }
+
+  .card.sched .jp {
+    font-size: 1.2rem;
+    margin-top: 4px;
+  }
+
+  .card.backup {
+    padding: 14px 56px 14px 20px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    box-shadow: none;
+  }
+
+  .card.backup .jp {
+    font-size: 1.05rem;
+    font-weight: 400;
+  }
+
+  .sub-heading {
+    font-size: 0.8rem;
+    color: var(--sub-ink);
+    margin: 20px 0 10px;
+    padding-left: 2px;
+  }
+
+  .day-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 999px;
+    padding: 2px 9px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* 購物子項目 */
+  .subs {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sub-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    width: 100%;
+    text-align: left;
+    padding: 7px 4px;
+    border: none;
+    background: none;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+
+  .sub-row .box {
+    flex: 0 0 auto;
+    width: 19px;
+    height: 19px;
+    margin-top: 1px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    color: transparent;
+    line-height: 1;
+  }
+
+  .sub-row.done .box {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  .sub-row.done .sub-text {
+    color: var(--sub-ink);
+    text-decoration: line-through;
+  }
+
+  .sub-progress {
+    font-size: 0.75rem;
+    color: var(--sub-ink);
+    margin-top: 6px;
+  }
+
+  /* 機票頁 */
+  .flight-card {
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 0;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(60, 45, 25, 0.08);
+    overflow: hidden;
+  }
+
+  .flight-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--primary);
+    color: #fff;
+    padding: 9px 16px;
+    font-size: 0.82rem;
+  }
+
+  .flight-head .fno {
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+  }
+
+  .flight-body {
+    display: flex;
+    align-items: flex-start;
+    padding: 18px 16px 16px;
+    gap: 10px;
+  }
+
+  .flight-end {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .flight-end.right { text-align: right; }
+
+  .flight-code {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-family: "Courier New", monospace;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .flight-time {
+    font-size: 1.35rem;
+    font-weight: 700;
+    font-family: "Courier New", monospace;
+    margin-top: 6px;
+    color: var(--primary-dark);
+  }
+
+  .flight-city {
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  .flight-term {
+    font-size: 0.75rem;
+    color: var(--sub-ink);
+    margin-top: 2px;
+  }
+
+  .flight-mid {
+    flex: 0 0 auto;
+    text-align: center;
+    padding-top: 8px;
+    color: var(--sub-ink);
+  }
+
+  .flight-mid .arrow {
+    font-size: 1.1rem;
+    color: var(--primary);
+  }
+
+  .flight-mid .dur {
+    font-size: 0.68rem;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+
+  .flight-foot {
+    border-top: 1px dashed var(--border);
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    color: var(--sub-ink);
+  }
+
+  .ref-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .ref-box > div {
+    flex: 1;
+    background: var(--primary-tint);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .ref-box .k {
+    font-size: 0.7rem;
+    color: var(--primary-dark);
+  }
+
+  .ref-box .v {
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-family: "Courier New", monospace;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+    color: var(--ink);
+  }
+
+  /* 住宿頁 */
+  .hotel-card {
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(60, 45, 25, 0.08);
+  }
+
+  .hotel-name-ja {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .hotel-name-sub {
+    font-size: 0.8rem;
+    color: var(--sub-ink);
+    margin-top: 4px;
+  }
+
+  .hotel-name-en {
+    font-size: 0.9rem;
+    color: var(--primary-dark);
+    margin-top: 6px;
+    letter-spacing: 0.01em;
+  }
+
+  .hotel-rows {
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .hotel-row {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .hotel-row:last-child { border-bottom: none; }
+
+  .hotel-row .label {
+    flex: 0 0 62px;
+    color: var(--sub-ink);
+    font-size: 0.82rem;
+    padding-top: 2px;
+  }
+
+  .hotel-row .val { flex: 1 1 auto; min-width: 0; }
+
+  .hotel-row .val a {
+    color: var(--primary-dark);
+    text-decoration: none;
+    border-bottom: 1px solid var(--primary-tint);
+  }
+
+  .inout {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .inout div {
+    flex: 1;
+    background: var(--primary-tint);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+
+  .inout .k {
+    font-size: 0.72rem;
+    color: var(--primary-dark);
+  }
+
+  .inout .v {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: "Courier New", monospace;
+    margin-top: 2px;
+  }
+
+  .hotel-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .hotel-actions a {
+    flex: 1;
+    text-align: center;
+    padding: 11px 8px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .hotel-actions a.ghost {
+    background: transparent;
+    color: var(--primary-dark);
+    border: 1.5px solid var(--primary);
+  }
+
+  /* 給司機看的大字卡 */
+  .show-card {
+    background: #fff;
+    border: 2px solid var(--primary);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+
+  .show-card .show-label {
+    display: inline-block;
+    font-size: 0.72rem;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 14px;
+  }
+
+  .show-card .show-line {
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.5;
+    color: #000;
+  }
+
+  .show-card .show-addr {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.5;
+    color: #000;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .show-card .show-tel {
+    font-size: 1.2rem;
+    margin-top: 12px;
+    font-family: "Courier New", monospace;
+    color: #000;
+  }
+
+  .show-card .show-zh {
+    font-size: 0.8rem;
+    color: var(--sub-ink);
+    margin-top: 12px;
+  }
+
+  .phrase-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    color: var(--primary-dark);
+    background: var(--primary-tint);
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-bottom: 8px;
+  }
+
+  /* 化妝步驟 */
+  .step {
+    display: flex;
+    gap: 14px;
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(60, 45, 25, 0.08);
+  }
+
+  .step-num {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .step-body {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .step-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.3;
+    padding-top: 3px;
+  }
+
+  .step-subs {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    counter-reset: substep;
+  }
+
+  .step-subs > li {
+    position: relative;
+    padding-left: 26px;
+    margin-bottom: 8px;
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+
+  .step-subs > li::before {
+    counter-increment: substep;
+    content: counter(substep) ".";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  .step-bullets {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+  }
+
+  .step-bullets li {
+    position: relative;
+    padding-left: 14px;
+    margin-top: 4px;
+    font-size: 0.88rem;
+    color: var(--sub-ink);
+    line-height: 1.5;
+  }
+
+  .step-bullets li::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  /* Floating rescue button */
+  .fab {
+    position: fixed;
+    right: 20px;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    font-size: 1.4rem;
+    box-shadow: 0 3px 10px rgba(60, 30, 10, 0.35);
+    z-index: 30;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fab-label {
+    position: fixed;
+    right: 82px;
+    bottom: 36px;
+    font-size: 0.68rem;
+    color: var(--primary-dark);
+    background: var(--primary-tint);
+    padding: 3px 8px;
+    border-radius: 999px;
+    z-index: 30;
+    pointer-events: none;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 20, 10, 0.45);
+    z-index: 40;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-backdrop.open {
+    display: flex;
+  }
+
+  .modal-sheet {
+    background: var(--bg);
+    width: 100%;
+    max-width: 560px;
+    max-height: 82vh;
+    border-radius: 16px 16px 0 0;
+    overflow-y: auto;
+    padding: 16px 16px 24px;
+    animation: slideUp 0.18s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .modal-head h2 {
+    font-size: 1.05rem;
+    color: var(--primary-dark);
+    margin: 0;
+  }
+
+  .modal-close {
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    color: var(--sub-ink);
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .modal-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .modal-tabs button {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .modal-tabs button.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .rescue-item {
+    background: var(--paper);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--primary);
+  }
+
+  .rescue-item .num {
+    font-size: 0.7rem;
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+
+  .rescue-item .jp {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .rescue-item .kana {
+    font-size: 0.78rem;
+    color: var(--sub-ink);
+    margin-top: 2px;
+  }
+
+  .rescue-item .zh {
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+
+  .rescue-item .romaji {
+    font-size: 0.75rem;
+    color: var(--primary-dark);
+    font-style: italic;
+    margin-top: 3px;
+  }
+
+  .tip-item {
+    background: var(--paper);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border-left: 4px solid var(--primary);
+  }
+
+  .tip-item code {
+    background: var(--primary-tint);
+    color: var(--primary-dark);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="top">
+    <h1>福岡旅遊手冊<span class="sub">FUKUOKA TRAVEL GUIDE</span></h1>
+    <div class="search-wrap">
+      <input id="search" type="text" placeholder="搜尋中文、日文或羅馬拼音…" autocomplete="off">
+      <button class="search-clear" id="searchClear">✕</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <div class="zone-bar" id="zoneBar"></div>
+
+  <div class="status-bar" id="statusBar">
+    <span id="progressText"></span>
+    <span style="display:flex; gap:14px;">
+      <label class="filter-toggle">
+        <input type="checkbox" id="onlyStarred">
+        ★ <span class="star-label-text">只看收藏</span>
+      </label>
+      <label class="filter-toggle">
+        <input type="checkbox" id="onlyUnlearned">
+        只看未學會
+      </label>
+    </span>
+  </div>
+
+  <main id="main"></main>
+
+</div>
+
+<button class="fab" id="fabBtn" title="快速救命卡">🆘</button>
+
+<nav class="bottom-nav" id="modeSwitch">
+  <div class="bottom-nav-inner">
+    <button class="nav-btn active" data-mode="bucket"><span class="nav-icon">📍</span>口袋</button>
+  </div>
+</nav>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h2 id="modalTitle">快速救命卡</h2>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="active" data-modal="rescue">🆘 救命句</button>
+      <button data-modal="tips">🔊 發音提醒</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+  // ---------- 資料 ----------
+  const categories = [
+    {
+      id: 1, icon: "🙏", name: "禮貌回應",
+      items: [
+        { jp: "おはようございます", zh: "早安", kana: "おはようございます", romaji: "ohayou gozaimasu" },
+        { jp: "こんにちは", zh: "你好", kana: "こんにちは", romaji: "konnichiwa" },
+        { jp: "こんばんは", zh: "晚安／晚上好", kana: "こんばんは", romaji: "konbanwa" },
+        { jp: "ありがとうございます", zh: "謝謝", kana: "ありがとうございます", romaji: "arigatou gozaimasu" },
+        { jp: "すみません", zh: "不好意思／借過／請問", kana: "すみません", romaji: "sumimasen" },
+        { jp: "ごめんなさい", zh: "對不起", kana: "ごめんなさい", romaji: "gomennasai" },
+        { jp: "お願いします", zh: "麻煩您／拜託", kana: "おねがいします", romaji: "onegai shimasu" },
+        { jp: "はい／いいえ", zh: "是／不是", kana: "はい／いいえ", romaji: "hai / iie" },
+        { jp: "大丈夫です", zh: "沒關係／不用了／我可以", kana: "だいじょうぶです", romaji: "daijoubu desu" },
+        { jp: "わかりました", zh: "我明白了", kana: "わかりました", romaji: "wakarimashita" },
+        { jp: "わかりません", zh: "我不明白", kana: "わかりません", romaji: "wakarimasen" },
+        { jp: "もう一度お願いします", zh: "請再說一次", kana: "もういちど おねがいします", romaji: "mou ichido onegai shimasu" },
+        { jp: "ゆっくりお願いします", zh: "請說慢一點", kana: "ゆっくり おねがいします", romaji: "yukkuri onegai shimasu" },
+        { jp: "日本語があまりわかりません", zh: "我不太懂日文", kana: "にほんごが あまり わかりません", romaji: "nihongo ga amari wakarimasen" },
+        { jp: "英語は話せますか？", zh: "會說英文嗎？", kana: "えいごは はなせますか", romaji: "eigo wa hanasemasu ka" }
+      ]
+    },
+    {
+      id: 2, icon: "✈️", name: "機場入境",
+      items: [
+        { jp: "空港", zh: "機場", kana: "くうこう", romaji: "kuukou" },
+        { jp: "国際線／国内線", zh: "國際線／國內線", kana: "こくさいせん／こくないせん", romaji: "kokusaisen / kokunaisen" },
+        { jp: "到着／出発", zh: "抵達／出發", kana: "とうちゃく／しゅっぱつ", romaji: "touchaku / shuppatsu" },
+        { jp: "入国審査", zh: "入境審查", kana: "にゅうこくしんさ", romaji: "nyuukoku shinsa" },
+        { jp: "税関", zh: "海關", kana: "ぜいかん", romaji: "zeikan" },
+        { jp: "手荷物受取所", zh: "行李提領處", kana: "てにもつ うけとりじょ", romaji: "tenimotsu uketorijo" },
+        { jp: "預け荷物", zh: "托運行李", kana: "あずけにもつ", romaji: "azuke nimotsu" },
+        { jp: "機内持ち込み", zh: "隨身帶上飛機", kana: "きない もちこみ", romaji: "kinai mochikomi" },
+        { jp: "免税店", zh: "免稅店", kana: "めんぜいてん", romaji: "menzeiten" },
+        { jp: "両替", zh: "換錢", kana: "りょうがえ", romaji: "ryougae" },
+        { jp: "この荷物はどこで受け取りますか？", zh: "這件行李在哪裡領？", kana: "この にもつは どこで うけとりますか", romaji: "kono nimotsu wa doko de uketorimasu ka" }
+      ]
+    },
+    {
+      id: 3, icon: "🚃", name: "電車巴士",
+      items: [
+        { jp: "駅", zh: "車站", kana: "えき", romaji: "eki" },
+        { jp: "地下鉄", zh: "地鐵", kana: "ちかてつ", romaji: "chikatetsu" },
+        { jp: "電車", zh: "電車", kana: "でんしゃ", romaji: "densha" },
+        { jp: "西鉄", zh: "西日本鐵道（西鐵）", kana: "にしてつ", romaji: "nishitetsu" },
+        { jp: "JR", zh: "JR", kana: "じぇいあーる", romaji: "jei aaru" },
+        { jp: "バス／タクシー", zh: "公車／計程車", kana: "ばす／たくしー", romaji: "basu / takushii" },
+        { jp: "切符", zh: "車票", kana: "きっぷ", romaji: "kippu" },
+        { jp: "乗車券", zh: "乘車券", kana: "じょうしゃけん", romaji: "joushaken" },
+        { jp: "特急券", zh: "特急券", kana: "とっきゅうけん", romaji: "tokkyuuken" },
+        { jp: "一日乗車券", zh: "一日乘車券", kana: "いちにち じょうしゃけん", romaji: "ichinichi joushaken" },
+        { jp: "改札口", zh: "驗票閘門", kana: "かいさつぐち", romaji: "kaisatsuguchi" },
+        { jp: "券売機", zh: "售票機", kana: "けんばいき", romaji: "kenbaiki" },
+        { jp: "乗り場", zh: "乘車處／月台", kana: "のりば", romaji: "noriba" },
+        { jp: "何番線", zh: "第幾月台", kana: "なんばんせん", romaji: "nanbansen" },
+        { jp: "普通／快速／特急", zh: "普通／快速／特急", kana: "ふつう／かいそく／とっきゅう", romaji: "futsuu / kaisoku / tokkyuu" },
+        { jp: "各駅停車", zh: "每站皆停", kana: "かくえき ていしゃ", romaji: "kakueki teisha" },
+        { jp: "始発／終電", zh: "首班車／末班車", kana: "しはつ／しゅうでん", romaji: "shihatsu / shuuden" },
+        { jp: "乗り換え", zh: "轉乘", kana: "のりかえ", romaji: "norikae" },
+        { jp: "次の駅", zh: "下一站", kana: "つぎの えき", romaji: "tsugi no eki" },
+        { jp: "出口／入口", zh: "出口／入口", kana: "でぐち／いりぐち", romaji: "deguchi / iriguchi" },
+        { jp: "右／左／まっすぐ", zh: "右／左／直走", kana: "みぎ／ひだり／まっすぐ", romaji: "migi / hidari / massugu" },
+        { jp: "この電車は天神に行きますか？", zh: "這班車會到天神嗎？", kana: "この でんしゃは てんじんに いきますか", romaji: "kono densha wa Tenjin ni ikimasu ka" },
+        { jp: "太宰府までいくらですか？", zh: "到太宰府多少錢？", kana: "だざいふまで いくらですか", romaji: "Dazaifu made ikura desu ka" },
+        { jp: "どこで乗り換えますか？", zh: "在哪裡轉車？", kana: "どこで のりかえますか", romaji: "doko de norikaemasu ka" },
+        { jp: "ICカードは使えますか？", zh: "可以使用交通卡嗎？", kana: "あいしーかーどは つかえますか", romaji: "ai shii kaado wa tsukaemasu ka" },
+        { jp: "Apple Payは使えますか？", zh: "可以用 Apple Pay 嗎？", kana: "あっぷるぺいは つかえますか", romaji: "appuru pei wa tsukaemasu ka" }
+      ]
+    },
+    {
+      id: 16, icon: "🚕", name: "計程車",
+      items: [
+        { jp: "タクシー乗り場", zh: "計程車乘車處", kana: "たくしー のりば", romaji: "takushii noriba" },
+        { jp: "空車", zh: "空車、可以搭乘", kana: "くうしゃ", romaji: "kuusha" },
+        { jp: "迎車", zh: "預約接客中", kana: "げいしゃ", romaji: "geisha" },
+        { jp: "予約車", zh: "已被預約的車", kana: "よやくしゃ", romaji: "yoyakusha" },
+        { jp: "タクシーを呼んでもらえますか？", zh: "可以幫我叫計程車嗎？", kana: "たくしーを よんで もらえますか", romaji: "takushii o yonde moraemasu ka" },
+        { jp: "タクシー乗り場はどこですか？", zh: "計程車乘車處在哪裡？", kana: "たくしー のりばは どこですか", romaji: "takushii noriba wa doko desu ka" },
+        { jp: "予約したタクシーですか？", zh: "這是我預約的計程車嗎？", kana: "よやくした たくしーですか", romaji: "yoyaku shita takushii desu ka" },
+        { jp: "私の名前は陳です", zh: "我姓陳", kana: "わたしの なまえは ちんです", romaji: "watashi no namae wa Chin desu" },
+        { jp: "二人です", zh: "我們有兩位", kana: "ふたりです", romaji: "futari desu" },
+        { jp: "荷物", zh: "行李", kana: "にもつ", romaji: "nimotsu" },
+        { jp: "トランク", zh: "後車廂", kana: "とらんく", romaji: "toranku" },
+        { jp: "スーツケース", zh: "行李箱", kana: "すーつけーす", romaji: "suutsukeesu" },
+        { jp: "スーツケースがあります", zh: "我們有行李箱", kana: "すーつけーすが あります", romaji: "suutsukeesu ga arimasu" },
+        { jp: "荷物をトランクに入れてもいいですか？", zh: "可以把行李放進後車廂嗎？", kana: "にもつを とらんくに いれても いいですか", romaji: "nimotsu o toranku ni iretemo ii desu ka" },
+        { jp: "荷物を手伝ってもらえますか？", zh: "可以幫忙搬行李嗎？", kana: "にもつを てつだって もらえますか", romaji: "nimotsu o tetsudatte moraemasu ka" },
+        { jp: "ここまでお願いします", zh: "麻煩載我到這裡", kana: "ここまで おねがいします", romaji: "koko made onegai shimasu" },
+        { jp: "福岡空港までお願いします", zh: "麻煩載我到福岡機場", kana: "ふくおか くうこうまで おねがいします", romaji: "Fukuoka Kuukou made onegai shimasu" },
+        { jp: "このホテルまでお願いします", zh: "麻煩載我到這間飯店", kana: "この ほてるまで おねがいします", romaji: "kono hoteru made onegai shimasu" },
+        { jp: "この住所までお願いします", zh: "麻煩載我到這個地址", kana: "この じゅうしょまで おねがいします", romaji: "kono juusho made onegai shimasu" },
+        { jp: "Googleマップを見てもらえますか？", zh: "可以看一下 Google Maps 嗎？", kana: "ぐーぐるまっぷを みて もらえますか", romaji: "Guuguru Mappu o mite moraemasu ka" },
+        { jp: "博多駅の筑紫口までお願いします", zh: "麻煩載我到博多站筑紫口", kana: "はかたえきの ちくしぐちまで おねがいします", romaji: "Hakata-eki no Chikushi-guchi made onegai shimasu" },
+        { jp: "国内線ターミナルまでお願いします", zh: "麻煩到國內線航廈", kana: "こくないせん たーみなるまで おねがいします", romaji: "kokunaisen taaminaru made onegai shimasu" },
+        { jp: "国際線ターミナルまでお願いします", zh: "麻煩到國際線航廈", kana: "こくさいせん たーみなるまで おねがいします", romaji: "kokusaisen taaminaru made onegai shimasu" },
+        { jp: "どのくらいかかりますか？", zh: "大概要多久？", kana: "どのくらい かかりますか", romaji: "dono kurai kakarimasu ka" },
+        { jp: "料金はどのくらいかかりますか？", zh: "車資大約多少？", kana: "りょうきんは どのくらい かかりますか", romaji: "ryoukin wa dono kurai kakarimasu ka" },
+        { jp: "高速道路を使いますか？", zh: "會走高速公路嗎？", kana: "こうそくどうろを つかいますか", romaji: "kousoku douro o tsukaimasu ka" },
+        { jp: "高速料金は別ですか？", zh: "高速公路費另外計算嗎？", kana: "こうそく りょうきんは べつですか", romaji: "kousoku ryoukin wa betsu desu ka" },
+        { jp: "急いでいます", zh: "我在趕時間", kana: "いそいで います", romaji: "isoide imasu" },
+        { jp: "急いでいません", zh: "我不趕時間", kana: "いそいで いません", romaji: "isoide imasen" },
+        { jp: "ここで止めてください", zh: "請停在這裡", kana: "ここで とめて ください", romaji: "koko de tomete kudasai" },
+        { jp: "ここで大丈夫です", zh: "在這裡就可以了", kana: "ここで だいじょうぶです", romaji: "koko de daijoubu desu" },
+        { jp: "次の角を右に曲がってください", zh: "請在下一個轉角右轉", kana: "つぎの かどを みぎに まがって ください", romaji: "tsugi no kado o migi ni magatte kudasai" },
+        { jp: "次の角を左に曲がってください", zh: "請在下一個轉角左轉", kana: "つぎの かどを ひだりに まがって ください", romaji: "tsugi no kado o hidari ni magatte kudasai" },
+        { jp: "まっすぐ行ってください", zh: "請直走", kana: "まっすぐ いって ください", romaji: "massugu itte kudasai" },
+        { jp: "入口の前でお願いします", zh: "麻煩停在入口前", kana: "いりぐちの まえで おねがいします", romaji: "iriguchi no mae de onegai shimasu" },
+        { jp: "おいくらですか？", zh: "多少錢？", kana: "おいくらですか", romaji: "oikura desu ka" },
+        { jp: "現金で払います", zh: "我要付現金", kana: "げんきんで はらいます", romaji: "genkin de haraimasu" },
+        { jp: "カードで払えますか？", zh: "可以刷卡嗎？", kana: "かーどで はらえますか", romaji: "kaado de haraemasu ka" },
+        { jp: "クレジットカードでお願いします", zh: "請用信用卡付款", kana: "くれじっとかーどで おねがいします", romaji: "kurejitto kaado de onegai shimasu" },
+        { jp: "ICカードは使えますか？", zh: "可以使用交通卡嗎？", kana: "あいしーかーどは つかえますか", romaji: "ai shii kaado wa tsukaemasu ka" },
+        { jp: "タッチ決済は使えますか？", zh: "可以使用感應付款嗎？", kana: "たっち けっさいは つかえますか", romaji: "tacchi kessai wa tsukaemasu ka" },
+        { jp: "領収書をください", zh: "請給我收據", kana: "りょうしゅうしょを ください", romaji: "ryoushuusho o kudasai" },
+        { jp: "お釣り", zh: "找零", kana: "おつり", romaji: "otsuri" },
+        { jp: "ありがとうございました", zh: "謝謝您", kana: "ありがとうございました", romaji: "arigatou gozaimashita" }
+      ]
+    },
+    {
+      id: 4, icon: "📍", name: "站名地名",
+      items: [
+        { jp: "福岡空港", zh: "福岡機場", kana: "ふくおか くうこう", romaji: "Fukuoka Kuukou" },
+        { jp: "博多", zh: "博多", kana: "はかた", romaji: "Hakata" },
+        { jp: "天神", zh: "天神", kana: "てんじん", romaji: "Tenjin" },
+        { jp: "天神南", zh: "天神南", kana: "てんじんみなみ", romaji: "Tenjin-minami" },
+        { jp: "中洲川端", zh: "中洲川端", kana: "なかすかわばた", romaji: "Nakasu-Kawabata" },
+        { jp: "薬院", zh: "藥院", kana: "やくいん", romaji: "Yakuin" },
+        { jp: "大濠公園", zh: "大濠公園", kana: "おおほりこうえん", romaji: "Oohori Kouen" },
+        { jp: "西新", zh: "西新", kana: "にしじん", romaji: "Nishijin" },
+        { jp: "姪浜", zh: "姪濱", kana: "めいのはま", romaji: "Meinohama" },
+        { jp: "太宰府", zh: "太宰府", kana: "だざいふ", romaji: "Dazaifu" },
+        { jp: "柳川", zh: "柳川", kana: "やながわ", romaji: "Yanagawa" },
+        { jp: "糸島", zh: "糸島", kana: "いとしま", romaji: "Itoshima" }
+      ]
+    },
+    {
+      id: 5, icon: "🏨", name: "飯店住宿",
+      items: [
+        { jp: "ホテル", zh: "飯店", kana: "ほてる", romaji: "hoteru" },
+        { jp: "予約", zh: "預約", kana: "よやく", romaji: "yoyaku" },
+        { jp: "受付／フロント", zh: "櫃檯", kana: "うけつけ／ふろんと", romaji: "uketsuke / furonto" },
+        { jp: "チェックイン／チェックアウト", zh: "入住／退房", kana: "ちぇっくいん／ちぇっくあうと", romaji: "chekku in / chekku auto" },
+        { jp: "部屋", zh: "房間", kana: "へや", romaji: "heya" },
+        { jp: "鍵", zh: "鑰匙", kana: "かぎ", romaji: "kagi" },
+        { jp: "荷物", zh: "行李", kana: "にもつ", romaji: "nimotsu" },
+        { jp: "朝食", zh: "早餐", kana: "ちょうしょく", romaji: "choushoku" },
+        { jp: "禁煙／喫煙", zh: "禁菸／吸菸", kana: "きんえん／きつえん", romaji: "kin'en / kitsuen" },
+        { jp: "二人です", zh: "兩位", kana: "ふたりです", romaji: "futari desu" },
+        { jp: "予約しています", zh: "我有預約", kana: "よやくして います", romaji: "yoyaku shite imasu" },
+        { jp: "荷物を預かってもらえますか？", zh: "可以寄放行李嗎？", kana: "にもつを あずかって もらえますか", romaji: "nimotsu o azukatte moraemasu ka" },
+        { jp: "Wi-Fiのパスワードは何ですか？", zh: "Wi-Fi 密碼是什麼？", kana: "わいふぁいの ぱすわーどは なんですか", romaji: "wai-fai no pasuwaado wa nan desu ka" }
+      ]
+    },
+    {
+      id: 6, icon: "🍜", name: "餐廳點餐",
+      items: [
+        { jp: "レストラン／カフェ", zh: "餐廳／咖啡店", kana: "れすとらん／かふぇ", romaji: "resutoran / kafe" },
+        { jp: "メニュー", zh: "菜單", kana: "めにゅー", romaji: "menyuu" },
+        { jp: "注文", zh: "點餐", kana: "ちゅうもん", romaji: "chuumon" },
+        { jp: "おすすめ", zh: "推薦", kana: "おすすめ", romaji: "osusume" },
+        { jp: "人気", zh: "人氣", kana: "にんき", romaji: "ninki" },
+        { jp: "名物", zh: "當地名物", kana: "めいぶつ", romaji: "meibutsu" },
+        { jp: "ラーメン", zh: "拉麵", kana: "らーめん", romaji: "raamen" },
+        { jp: "もつ鍋", zh: "牛腸鍋", kana: "もつなべ", romaji: "motsunabe" },
+        { jp: "水炊き", zh: "雞肉汆鍋", kana: "みずたき", romaji: "mizutaki" },
+        { jp: "明太子", zh: "明太子", kana: "めんたいこ", romaji: "mentaiko" },
+        { jp: "焼肉", zh: "燒肉", kana: "やきにく", romaji: "yakiniku" },
+        { jp: "焼き鳥", zh: "烤雞串", kana: "やきとり", romaji: "yakitori" },
+        { jp: "海鮮", zh: "海鮮", kana: "かいせん", romaji: "kaisen" },
+        { jp: "ご飯／麺", zh: "飯／麵", kana: "ごはん／めん", romaji: "gohan / men" },
+        { jp: "肉／魚／野菜", zh: "肉／魚／蔬菜", kana: "にく／さかな／やさい", romaji: "niku / sakana / yasai" },
+        { jp: "辛い／甘い", zh: "辣／甜", kana: "からい／あまい", romaji: "karai / amai" },
+        { jp: "飲み物", zh: "飲料", kana: "のみもの", romaji: "nomimono" },
+        { jp: "お冷", zh: "冰水", kana: "おひや", romaji: "ohiya" },
+        { jp: "生ビール", zh: "生啤酒", kana: "なまびーる", romaji: "nama biiru" },
+        { jp: "店内／持ち帰り", zh: "內用／外帶", kana: "てんない／もちかえり", romaji: "tennai / mochikaeri" },
+        { jp: "二人です", zh: "兩位", kana: "ふたりです", romaji: "futari desu" },
+        { jp: "予約していません", zh: "沒有預約", kana: "よやくして いません", romaji: "yoyaku shite imasen" },
+        { jp: "おすすめは何ですか？", zh: "有什麼推薦？", kana: "おすすめは なんですか", romaji: "osusume wa nan desu ka" },
+        { jp: "これを二つください", zh: "請給我兩份這個", kana: "これを ふたつ ください", romaji: "kore o futatsu kudasai" },
+        { jp: "写真と同じものをください", zh: "我要跟照片一樣的", kana: "しゃしんと おなじものを ください", romaji: "shashin to onaji mono o kudasai" },
+        { jp: "アレルギーがあります", zh: "我有過敏", kana: "あれるぎーが あります", romaji: "arerugii ga arimasu" },
+        { jp: "これは何が入っていますか？", zh: "這裡面有什麼？", kana: "これは なにが はいっていますか", romaji: "kore wa nani ga haitte imasu ka" },
+        { jp: "お会計お願いします", zh: "麻煩結帳", kana: "おかいけい おねがいします", romaji: "okaikei onegai shimasu" },
+        { jp: "別々に払えますか？", zh: "可以分開付款嗎？", kana: "べつべつに はらえますか", romaji: "betsubetsu ni haraemasu ka" },
+        { jp: "ごちそうさまでした", zh: "謝謝招待／很好吃", kana: "ごちそうさまでした", romaji: "gochisousama deshita" }
+      ]
+    },
+    {
+      id: 7, icon: "🛍️", name: "購物藥妝",
+      items: [
+        { jp: "百貨店", zh: "百貨公司", kana: "ひゃっかてん", romaji: "hyakkaten" },
+        { jp: "化粧品", zh: "化妝品", kana: "けしょうひん", romaji: "keshouhin" },
+        { jp: "ファンデーション", zh: "粉底", kana: "ふぁんでーしょん", romaji: "fandeeshon" },
+        { jp: "フェイスパウダー", zh: "蜜粉", kana: "ふぇいすぱうだー", romaji: "feisu paudaa" },
+        { jp: "ビューラー", zh: "睫毛夾", kana: "びゅーらー", romaji: "byuuraa" },
+        { jp: "在庫", zh: "庫存", kana: "ざいこ", romaji: "zaiko" },
+        { jp: "売り切れ", zh: "售完", kana: "うりきれ", romaji: "urikire" },
+        { jp: "新商品", zh: "新商品", kana: "しんしょうひん", romaji: "shinshouhin" },
+        { jp: "色", zh: "顏色", kana: "いろ", romaji: "iro" },
+        { jp: "サイズ", zh: "尺寸", kana: "さいず", romaji: "saizu" },
+        { jp: "試着室", zh: "試衣間", kana: "しちゃくしつ", romaji: "shichakushitsu" },
+        { jp: "免税", zh: "免稅", kana: "めんぜい", romaji: "menzei" },
+        { jp: "パスポート", zh: "護照", kana: "ぱすぽーと", romaji: "pasupooto" },
+        { jp: "現金／クレジットカード", zh: "現金／信用卡", kana: "げんきん／くれじっとかーど", romaji: "genkin / kurejitto kaado" },
+        { jp: "袋", zh: "袋子", kana: "ふくろ", romaji: "fukuro" },
+        { jp: "いくらですか？", zh: "多少錢？", kana: "いくらですか", romaji: "ikura desu ka" },
+        { jp: "これを見せてください", zh: "請讓我看看這個", kana: "これを みせて ください", romaji: "kore o misete kudasai" },
+        { jp: "試してもいいですか？", zh: "可以試用嗎？", kana: "ためしても いいですか", romaji: "tameshite mo ii desu ka" },
+        { jp: "試着してもいいですか？", zh: "可以試穿嗎？", kana: "しちゃくしても いいですか", romaji: "shichaku shite mo ii desu ka" },
+        { jp: "ほかの色はありますか？", zh: "有其他顏色嗎？", kana: "ほかの いろは ありますか", romaji: "hoka no iro wa arimasu ka" },
+        { jp: "これより小さい／大きいサイズ", zh: "比這個小／大的尺寸", kana: "これより ちいさい／おおきい さいず", romaji: "kore yori chiisai / ookii saizu" },
+        { jp: "免税できますか？", zh: "可以免稅嗎？", kana: "めんぜい できますか", romaji: "menzei dekimasu ka" },
+        { jp: "カードで払います", zh: "我要刷卡", kana: "かーどで はらいます", romaji: "kaado de haraimasu" },
+        { jp: "袋はいりません", zh: "不需要袋子", kana: "ふくろは いりません", romaji: "fukuro wa irimasen" }
+      ]
+    },
+    {
+      id: 8, icon: "⛩️", name: "景點神社",
+      items: [
+        { jp: "神社／お寺", zh: "神社／寺廟", kana: "じんじゃ／おてら", romaji: "jinja / otera" },
+        { jp: "参拝", zh: "參拜", kana: "さんぱい", romaji: "sanpai" },
+        { jp: "鳥居", zh: "鳥居", kana: "とりい", romaji: "torii" },
+        { jp: "本殿", zh: "主殿", kana: "ほんでん", romaji: "honden" },
+        { jp: "お守り", zh: "護身符", kana: "おまもり", romaji: "omamori" },
+        { jp: "おみくじ", zh: "御神籤", kana: "おみくじ", romaji: "omikuji" },
+        { jp: "御朱印", zh: "御朱印", kana: "ごしゅいん", romaji: "goshuin" },
+        { jp: "御朱印帳", zh: "御朱印帳", kana: "ごしゅいんちょう", romaji: "goshuinchou" },
+        { jp: "拝観料", zh: "參觀費", kana: "はいかんりょう", romaji: "haikanryou" },
+        { jp: "写真撮影", zh: "拍照", kana: "しゃしん さつえい", romaji: "shashin satsuei" },
+        { jp: "撮影禁止", zh: "禁止拍照", kana: "さつえい きんし", romaji: "satsuei kinshi" },
+        { jp: "写真を撮ってもいいですか？", zh: "可以拍照嗎？", kana: "しゃしんを とっても いいですか", romaji: "shashin o totte mo ii desu ka" },
+        { jp: "写真を撮ってもらえますか？", zh: "可以幫我拍照嗎？", kana: "しゃしんを とって もらえますか", romaji: "shashin o totte moraemasu ka" },
+        { jp: "お守りはどこで買えますか？", zh: "護身符在哪裡買？", kana: "おまもりは どこで かえますか", romaji: "omamori wa doko de kaemasu ka" }
+      ]
+    },
+    {
+      id: 9, icon: "🏖️", name: "海邊戶外",
+      items: [
+        { jp: "海／海岸", zh: "海／海岸", kana: "うみ／かいがん", romaji: "umi / kaigan" },
+        { jp: "砂浜", zh: "沙灘", kana: "すなはま", romaji: "sunahama" },
+        { jp: "島", zh: "島", kana: "しま", romaji: "shima" },
+        { jp: "海鮮市場", zh: "海鮮市場", kana: "かいせん いちば", romaji: "kaisen ichiba" },
+        { jp: "遊泳禁止", zh: "禁止游泳", kana: "ゆうえい きんし", romaji: "yuuei kinshi" },
+        { jp: "波", zh: "海浪", kana: "なみ", romaji: "nami" },
+        { jp: "満潮／干潮", zh: "滿潮／退潮", kana: "まんちょう／かんちょう", romaji: "manchou / kanchou" },
+        { jp: "日焼け止め", zh: "防曬乳", kana: "ひやけどめ", romaji: "hiyakedome" },
+        { jp: "更衣室", zh: "更衣室", kana: "こういしつ", romaji: "kouishitsu" },
+        { jp: "コインロッカー", zh: "投幣置物櫃", kana: "こいんろっかー", romaji: "koin rokkaa" },
+        { jp: "ここで泳げますか？", zh: "這裡可以游泳嗎？", kana: "ここで およげますか", romaji: "koko de oyogemasu ka" }
+      ]
+    },
+    {
+      id: 10, icon: "🧗", name: "抱石館",
+      items: [
+        { jp: "ボルダリング", zh: "抱石", kana: "ぼるだりんぐ", romaji: "borudaringu" },
+        { jp: "初心者", zh: "初學者", kana: "しょしんしゃ", romaji: "shoshinsha" },
+        { jp: "初回登録", zh: "首次登記", kana: "しょかい とうろく", romaji: "shokai touroku" },
+        { jp: "利用料金", zh: "使用費", kana: "りよう りょうきん", romaji: "riyou ryoukin" },
+        { jp: "レンタルシューズ", zh: "租借攀岩鞋", kana: "れんたるしゅーず", romaji: "rentaru shuuzu" },
+        { jp: "チョーク", zh: "碳酸鎂粉", kana: "ちょーく", romaji: "chooku" },
+        { jp: "課題", zh: "攀爬路線／題目", kana: "かだい", romaji: "kadai" },
+        { jp: "グレード", zh: "難度等級", kana: "ぐれーど", romaji: "gureedo" },
+        { jp: "スタート／ゴール", zh: "起點／終點", kana: "すたーと／ごーる", romaji: "sutaato / gooru" },
+        { jp: "会員証", zh: "會員證", kana: "かいいんしょう", romaji: "kaiinshou" },
+        { jp: "初めてです", zh: "我是第一次來", kana: "はじめてです", romaji: "hajimete desu" },
+        { jp: "見学できますか？", zh: "可以參觀嗎？", kana: "けんがく できますか", romaji: "kengaku dekimasu ka" },
+        { jp: "靴を借りたいです", zh: "我想租鞋", kana: "くつを かりたいです", romaji: "kutsu o karitai desu" }
+      ]
+    },
+    {
+      id: 11, icon: "🚻", name: "廁所設施",
+      items: [
+        { jp: "トイレ／お手洗い", zh: "廁所／洗手間", kana: "といれ／おてあらい", romaji: "toire / otearai" },
+        { jp: "女性用／男性用", zh: "女廁／男廁", kana: "じょせいよう／だんせいよう", romaji: "joseiyou / danseiyou" },
+        { jp: "コンビニ", zh: "便利商店", kana: "こんびに", romaji: "konbini" },
+        { jp: "薬局", zh: "藥局", kana: "やっきょく", romaji: "yakkyoku" },
+        { jp: "充電器", zh: "充電器", kana: "じゅうでんき", romaji: "juudenki" },
+        { jp: "変換プラグ", zh: "轉接插頭", kana: "へんかんぷらぐ", romaji: "henkan puragu" },
+        { jp: "ごみ箱", zh: "垃圾桶", kana: "ごみばこ", romaji: "gomibako" },
+        { jp: "コインロッカー", zh: "投幣置物櫃", kana: "こいんろっかー", romaji: "koin rokkaa" },
+        { jp: "無料／有料", zh: "免費／付費", kana: "むりょう／ゆうりょう", romaji: "muryou / yuuryou" },
+        { jp: "使用中", zh: "使用中", kana: "しようちゅう", romaji: "shiyouchuu" },
+        { jp: "トイレはどこですか？", zh: "廁所在哪裡？", kana: "といれは どこですか", romaji: "toire wa doko desu ka" }
+      ]
+    },
+    {
+      id: 12, icon: "📋", name: "看不懂標示",
+      items: [
+        { jp: "営業中", zh: "營業中", kana: "えいぎょうちゅう", romaji: "eigyouchuu" },
+        { jp: "準備中", zh: "準備中／尚未營業", kana: "じゅんびちゅう", romaji: "junbichuu" },
+        { jp: "定休日", zh: "固定公休日", kana: "ていきゅうび", romaji: "teikyuubi" },
+        { jp: "臨時休業", zh: "臨時休息", kana: "りんじ きゅうぎょう", romaji: "rinji kyuugyou" },
+        { jp: "満席／空席", zh: "客滿／有空位", kana: "まんせき／くうせき", romaji: "manseki / kuuseki" },
+        { jp: "予約制", zh: "預約制", kana: "よやくせい", romaji: "yoyakusei" },
+        { jp: "関係者以外立入禁止", zh: "非相關人員禁止進入", kana: "かんけいしゃ いがい たちいりきんし", romaji: "kankeisha igai tachiiri kinshi" },
+        { jp: "押す／引く", zh: "推／拉", kana: "おす／ひく", romaji: "osu / hiku" },
+        { jp: "上り／下り", zh: "上行／下行", kana: "のぼり／くだり", romaji: "nobori / kudari" },
+        { jp: "入口／出口", zh: "入口／出口", kana: "いりぐち／でぐち", romaji: "iriguchi / deguchi" }
+      ]
+    },
+    {
+      id: 13, icon: "🚑", name: "緊急狀況",
+      items: [
+        { jp: "病院", zh: "醫院", kana: "びょういん", romaji: "byouin" },
+        { jp: "薬", zh: "藥", kana: "くすり", romaji: "kusuri" },
+        { jp: "救急車", zh: "救護車", kana: "きゅうきゅうしゃ", romaji: "kyuukyuusha" },
+        { jp: "警察", zh: "警察", kana: "けいさつ", romaji: "keisatsu" },
+        { jp: "交番", zh: "派出所", kana: "こうばん", romaji: "kouban" },
+        { jp: "痛い", zh: "痛", kana: "いたい", romaji: "itai" },
+        { jp: "気分が悪い", zh: "身體不舒服", kana: "きぶんが わるい", romaji: "kibun ga warui" },
+        { jp: "助けてください", zh: "請幫幫我", kana: "たすけて ください", romaji: "tasukete kudasai" },
+        { jp: "救急車を呼んでください", zh: "請叫救護車", kana: "きゅうきゅうしゃを よんで ください", romaji: "kyuukyuusha o yonde kudasai" },
+        { jp: "財布をなくしました", zh: "錢包不見了", kana: "さいふを なくしました", romaji: "saifu o nakushimashita" },
+        { jp: "パスポートをなくしました", zh: "護照不見了", kana: "ぱすぽーとを なくしました", romaji: "pasupooto o nakushimashita" }
+      ]
+    },
+    {
+      id: 14, icon: "🔢", name: "數字時間",
+      items: [
+        { jp: "一／二／三／四／五", zh: "1／2／3／4／5", kana: "いち／に／さん／よん／ご", romaji: "ichi / ni / san / yon / go" },
+        { jp: "一つ／二つ／三つ", zh: "一個／兩個／三個", kana: "ひとつ／ふたつ／みっつ", romaji: "hitotsu / futatsu / mittsu" },
+        { jp: "一人／二人", zh: "一位／兩位", kana: "ひとり／ふたり", romaji: "hitori / futari" },
+        { jp: "今日／明日", zh: "今天／明天", kana: "きょう／あした", romaji: "kyou / ashita" },
+        { jp: "今", zh: "現在", kana: "いま", romaji: "ima" },
+        { jp: "何時", zh: "幾點", kana: "なんじ", romaji: "nanji" },
+        { jp: "何分", zh: "幾分", kana: "なんぷん", romaji: "nanpun" },
+        { jp: "午前／午後", zh: "上午／下午", kana: "ごぜん／ごご", romaji: "gozen / gogo" },
+        { jp: "何時までですか？", zh: "到幾點？", kana: "なんじまで ですか", romaji: "nanji made desu ka" },
+        { jp: "どのくらいかかりますか？", zh: "大概要多久？", kana: "どのくらい かかりますか", romaji: "dono kurai kakarimasu ka" }
+      ]
+    },
+    {
+      id: 15, icon: "👉", name: "指物句型",
+      items: [
+        { jp: "これは何ですか？", zh: "這是什麼？", kana: "これは なんですか", romaji: "kore wa nan desu ka" },
+        { jp: "これはいくらですか？", zh: "這個多少錢？", kana: "これは いくらですか", romaji: "kore wa ikura desu ka" },
+        { jp: "これをください", zh: "請給我這個", kana: "これを ください", romaji: "kore o kudasai" },
+        { jp: "ここに行きたいです", zh: "我想去這裡", kana: "ここに いきたいです", romaji: "koko ni ikitai desu" },
+        { jp: "ここはどこですか？", zh: "這裡是哪裡？", kana: "ここは どこですか", romaji: "koko wa doko desu ka" },
+        { jp: "どちらですか？", zh: "是哪一邊？", kana: "どちらですか", romaji: "dochira desu ka" },
+        { jp: "使い方を教えてください", zh: "請教我怎麼使用", kana: "つかいかたを おしえて ください", romaji: "tsukaikata o oshiete kudasai" },
+        { jp: "翻訳機を使ってもいいですか？", zh: "可以使用翻譯機嗎？", kana: "ほんやくきを つかっても いいですか", romaji: "hon'yakuki o tsukatte mo ii desu ka" }
+      ]
+    },
+    {
+      id: 17, icon: "🗣️", name: "與當地人交流",
+      items: [
+        { jp: "すみません、少し聞いてもいいですか？", zh: "不好意思，可以請教一下嗎？", kana: "すみません、すこし きいても いいですか", romaji: "sumimasen, sukoshi kiite mo ii desu ka" },
+        { jp: "私たちは台湾から来ました。", zh: "我們從台灣來。", kana: "わたしたちは たいわんから きました", romaji: "watashitachi wa Taiwan kara kimashita" },
+        { jp: "福岡を旅行しています。", zh: "我們正在福岡旅行。", kana: "ふくおかを りょこうして います", romaji: "Fukuoka o ryokou shite imasu" },
+        { jp: "福岡の方ですか？", zh: "您是福岡人嗎？", kana: "ふくおかの かたですか", romaji: "Fukuoka no kata desu ka" },
+        { jp: "この辺にお住まいですか？", zh: "您住在這附近嗎？", kana: "このへんに おすまいですか", romaji: "kono hen ni osumai desu ka" },
+        { jp: "福岡には長く住んでいますか？", zh: "您在福岡住很久了嗎？", kana: "ふくおかには ながく すんで いますか", romaji: "Fukuoka ni wa nagaku sunde imasu ka" },
+        { jp: "福岡には何年くらい住んでいますか？", zh: "您在福岡大約住幾年了？", kana: "ふくおかには なんねんくらい すんで いますか", romaji: "Fukuoka ni wa nannen kurai sunde imasu ka" },
+        { jp: "福岡で生まれ育ったんですか？", zh: "您是在福岡出生長大的嗎？", kana: "ふくおかで うまれそだったんですか", romaji: "Fukuoka de umare sodatta n desu ka" },
+        { jp: "この近くでおすすめのお店はありますか？", zh: "這附近有推薦的店嗎？", kana: "この ちかくで おすすめの おみせは ありますか", romaji: "kono chikaku de osusume no omise wa arimasu ka" },
+        { jp: "地元の人がよく行くお店はありますか？", zh: "有當地人常去的店嗎？", kana: "じもとの ひとが よく いく おみせは ありますか", romaji: "jimoto no hito ga yoku iku omise wa arimasu ka" },
+        { jp: "あなたがよく行くお店はどこですか？", zh: "您平常常去哪一家店？", kana: "あなたが よく いく おみせは どこですか", romaji: "anata ga yoku iku omise wa doko desu ka" },
+        { jp: "福岡で一番好きなお店はどこですか？", zh: "您在福岡最喜歡哪一家店？", kana: "ふくおかで いちばん すきな おみせは どこですか", romaji: "Fukuoka de ichiban sukina omise wa doko desu ka" },
+        { jp: "福岡らしい料理が食べられるお店はありますか？", zh: "有可以吃到福岡特色料理的店嗎？", kana: "ふくおからしい りょうりが たべられる おみせは ありますか", romaji: "Fukuoka-rashii ryouri ga taberareru omise wa arimasu ka" },
+        { jp: "観光客向けではなく、地元のお店に行ってみたいです。", zh: "我想去當地人會去、不是專門給觀光客的店。", kana: "かんこうきゃくむけでは なく、じもとの おみせに いってみたいです", romaji: "kankoukyaku muke de wa naku, jimoto no omise ni itte mitai desu" },
+        { jp: "今から入れそうなお店はありますか？", zh: "有現在可能進得去的店嗎？", kana: "いまから はいれそうな おみせは ありますか", romaji: "ima kara haire-sou na omise wa arimasu ka" },
+        { jp: "ラーメンが食べたいです。", zh: "我想吃拉麵。", kana: "らーめんが たべたいです", romaji: "raamen ga tabetai desu" },
+        { jp: "焼肉のお店を探しています。", zh: "我們在找燒肉店。", kana: "やきにくの おみせを さがして います", romaji: "yakiniku no omise o sagashite imasu" },
+        { jp: "海鮮がおいしいお店はありますか？", zh: "有海鮮好吃的店嗎？", kana: "かいせんが おいしい おみせは ありますか", romaji: "kaisen ga oishii omise wa arimasu ka" },
+        { jp: "もつ鍋がおいしいお店はありますか？", zh: "有牛腸鍋好吃的店嗎？", kana: "もつなべが おいしい おみせは ありますか", romaji: "motsunabe ga oishii omise wa arimasu ka" },
+        { jp: "福岡名物を食べたいです。", zh: "我想吃福岡名產。", kana: "ふくおか めいぶつを たべたいです", romaji: "Fukuoka meibutsu o tabetai desu" },
+        { jp: "あまり高くないお店がいいです。", zh: "希望不要太貴。", kana: "あまり たかくない おみせが いいです", romaji: "amari takakunai omise ga ii desu" },
+        { jp: "一人三千円くらいがいいです。", zh: "希望每人大約三千日圓。", kana: "ひとり さんぜんえんくらいが いいです", romaji: "hitori sanzen-en kurai ga ii desu" },
+        { jp: "お店の名前をもう一度お願いします。", zh: "請再說一次店名。", kana: "おみせの なまえを もういちど おねがいします", romaji: "omise no namae o mou ichido onegai shimasu" },
+        { jp: "Googleマップで見せてもらえますか？", zh: "可以在 Google Maps 上指給我看嗎？", kana: "ぐーぐるまっぷで みせて もらえますか", romaji: "Guuguru Mappu de misete moraemasu ka" },
+        { jp: "ここから歩いて行けますか？", zh: "從這裡可以走過去嗎？", kana: "ここから あるいて いけますか", romaji: "koko kara aruite ikemasu ka" },
+        { jp: "ここからどのくらいかかりますか？", zh: "從這裡過去大概要多久？", kana: "ここから どのくらい かかりますか", romaji: "koko kara dono kurai kakarimasu ka" },
+        { jp: "予約は必要ですか？", zh: "需要預約嗎？", kana: "よやくは ひつようですか", romaji: "yoyaku wa hitsuyou desu ka" },
+        { jp: "二人でも入れますか？", zh: "兩個人也可以進去嗎？", kana: "ふたりでも はいれますか", romaji: "futari demo hairemasu ka" },
+        { jp: "ここに入力してもらえますか？", zh: "可以幫我輸入在這裡嗎？", kana: "ここに にゅうりょくして もらえますか", romaji: "koko ni nyuuryoku shite moraemasu ka" },
+        { jp: "ありがとうございます。行ってみます！", zh: "謝謝，我們去看看！", kana: "ありがとうございます。いってみます", romaji: "arigatou gozaimasu, itte mimasu" },
+        { jp: "とても助かりました。", zh: "真的幫了大忙。", kana: "とても たすかりました", romaji: "totemo tasukarimashita" },
+        { jp: "福岡を楽しみます！", zh: "我們會好好享受福岡之旅！", kana: "ふくおかを たのしみます", romaji: "Fukuoka o tanoshimimasu" }
+      ]
+    }
+  ];
+
+  // ---------- 口袋清單資料 ----------
+  const bucketCategories = [
+    {
+      id: 101, icon: "🍜", name: "美食",
+      items: [
+        { name: "麵屋兼虎", area: "天神", type: "沾麵", note: "在拉麵一條街", map: "https://www.google.com/maps/search/?api=1&query=麵屋兼虎+福岡", desc: "福岡No.1濃厚魚介沾麵名店，招牌辣辣魚每日大排長龍。", stars: 3, img: "source/thumbs/food_01.jpg" },
+        { name: "Shin Shin", area: "博多", type: "豚骨拉麵", note: "分店很多間", map: "https://www.google.com/maps/search/?api=1&query=Shin+Shin+博多", desc: "屋台起家的博多純情拉麵，細麵配清爽豚骨湯廣受喜愛。", stars: 3, img: "source/thumbs/food_02.jpg" },
+        { name: "博多牛腸鍋 山中", area: "博多運河城", type: "牛腸鍋", note: "聽說很好吃", map: "https://www.google.com/maps/search/?api=1&query=博多牛腸鍋+山中+博多運河城", desc: "味噌牛腸鍋發祥名店，濃醇湯頭配嚴選國產小腸。", stars: 3, img: "source/thumbs/food_03.jpg" },
+        { name: "水炊鍋", area: "博多住吉", type: "西式濃湯＋中式燉雞湯", note: "口味很清淡", map: "https://www.google.com/maps/search/?api=1&query=博多住吉+水炊鍋", desc: "創業80餘年水炊老舗，白濁雞湯配酢醬油難訂位。", stars: 3, img: "source/thumbs/food_04.jpg" },
+        { name: "WANSTEAK HOUSE", area: "天神", type: "鐵板燒（和牛）", note: "", map: "https://www.google.com/maps/search/?api=1&query=WANSTEAK+HOUSE+福岡", desc: "天神駅直結高樓鐵板燒，眼前現煎九州黑毛和牛。", stars: 2, img: "source/thumbs/food_05.jpg" },
+        { name: "黑田飯", area: "博多", type: "海鮮丼", note: "", map: "https://www.google.com/maps/search/?api=1&query=黑田飯+福岡", desc: "鮪魚批發商直營，招牌蔥花鮪魚丼用本鮪三部位。", stars: 2, img: "source/thumbs/food_06.jpg" },
+        { name: "Shake Shack", area: "博多", type: "漢堡、明太子薯條、草莓奶昔", note: "", map: "https://www.google.com/maps/search/?api=1&query=Shake+Shack+博多", desc: "紐約名漢堡九州首店，開幕連日大排長龍嚐限定款。", stars: 3, img: "source/thumbs/food_07.jpg" },
+        { name: "STAND T", area: "博多", type: "東京知名居酒屋", note: "有午間套餐、立飲文化", map: "https://www.google.com/maps/search/?api=1&query=STAND+T+博多", desc: "博多駅前站著喝居酒屋，下酒菜250円起超高CP值。", stars: 2, img: "source/thumbs/food_08.jpg" },
+        { name: "努努雞", area: "博多車站", type: "炸雞", note: "適合配啤酒", map: "https://www.google.com/maps/search/?api=1&query=努努雞+博多車站", desc: "冰過才吃的進化版炸雞，外皮酥脆帶甜辣醬超特別。", stars: 2, img: "source/thumbs/food_09.jpg" },
+        { name: "食堂光", area: "柳橋", type: "", note: "", map: "https://www.google.com/maps/search/?api=1&query=食堂光+柳橋", desc: "柳橋市場鮮魚店直營海鮮食堂，生魚片海鮮丼CP超高。", stars: 2, img: "source/thumbs/food_10.jpg" },
+        { name: "BAKURO", area: "藥院", type: "", note: "藥院分店", map: "https://www.google.com/maps/search/?api=1&query=BAKURO+藥院", desc: "尾崎牧場直送黑毛和牛燒肉，一頭買稀有部位階梯盛。", stars: 2, img: "source/thumbs/food_11.jpg" },
+        { name: "大東園 本店", area: "博多（櫛田神社前站）", type: "燒肉（九州黑毛和牛）", note: "平價好吃；1970 年創業老店，近博多運河城，營業 11:30–23:00；午餐較平價，很熱門建議預約", map: "https://www.google.com/maps/search/?api=1&query=大東園+本店+福岡", desc: "1970年創業博多燒肉百名店，和牛定食午餐超值。", stars: 3, img: "source/thumbs/food_12.jpg" },
+        { name: "糸島食堂", area: "糸島", type: "海鮮丼", note: "", map: "https://www.google.com/maps/search/?api=1&query=糸島食堂+本店+加布里", desc: "長浜市場直送鮮魚，海鮮丼份量滿滿的排隊名店", stars: 3, img: "source/thumbs/food_13.jpg" },
+        { name: "工房とったん 布丁", area: "糸島", type: "鹽布丁", note: "", map: "https://www.google.com/maps/search/?api=1&query=工房とったん+またいちの塩+糸島", desc: "糸島半島突端製鹽所名物，灑花鹽的甜鹹布丁需排隊", stars: 3, img: "source/thumbs/food_14.jpg" },
+        { name: "焼肉 仙匠", area: "藥院", type: "和牛燒肉", note: "福岡市中央區白金，西鐵藥院站步行約3分；晚間建議預約", map: "https://www.google.com/maps/search/?api=1&query=焼肉+仙匠+薬院", desc: "藥院和牛燒肉名店，部位選擇多、空間質感好，適合約會或聚餐。", stars: 3, img: "source/thumbs/food_15.jpg" }
+      ]
+    },
+    {
+      id: 102, icon: "☕", name: "咖啡甜點",
+      items: [
+        { name: "il Forno del Mignon", area: "博多站", type: "迷你可頌", note: "現烤", map: "https://www.google.com/maps/search/?api=1&query=il+Forno+del+Mignon+博多站", desc: "博多站內飄香的迷你可頌名店，剛出爐酥脆、秤重販售，常見排隊人龍。", stars: 3, img: "source/thumbs/cafe_01.jpg" },
+        { name: "Dacomecca", area: "博多站前", type: "麵包", note: "", map: "https://www.google.com/maps/search/?api=1&query=Dacomecca+福岡", desc: "名店アマムダコタン系列，博多站前排隊麵包店，入選麵包WEST百名店。", stars: 3, img: "source/thumbs/cafe_02.jpg" },
+        { name: "I'm donut?", area: "博多站前", type: "甜甜圈", note: "", map: "https://www.google.com/maps/search/?api=1&query=Im+donut+福岡", desc: "連日大排長龍的生甜甜圈專門店，口感濕潤軟綿，福岡必吃甜點。", stars: 3, img: "source/thumbs/cafe_03.jpg" },
+        { name: "Pain Stock", area: "天神", type: "明太子法國麵包", note: "", map: "https://www.google.com/maps/search/?api=1&query=Pain+Stock+天神", desc: "招牌明太子法國麵包公認絕品，天神人氣名店，常需排隊搶購。", stars: 3, img: "source/thumbs/cafe_04.jpg" },
+        { name: "daco", area: "中央區", type: "生甜甜圈", note: "", map: "https://www.google.com/maps/search/?api=1&query=daco+福岡", desc: "阿麵包達洽系列都市型麵包咖啡館，可內用I'm donut生甜甜圈免排隊。", stars: 2, img: "source/thumbs/cafe_05.jpg" },
+        { name: "Truffle Bakery", area: "天神地下街", type: "松露鹽可頌", note: "", map: "https://www.google.com/maps/search/?api=1&query=Truffle+Bakery+天神地下街", desc: "東京人氣烘焙九州首店，招牌白松露鹽可頌香氣濃郁，開幕即排隊。", stars: 3, img: "source/thumbs/cafe_06.jpg" },
+        { name: "PRESS BUTTER SAND", area: "天神地下街", type: "奶油夾心餅", note: "九州限定草莓口味", map: "https://www.google.com/maps/search/?api=1&query=PRESS+BUTTER+SAND+天神地下街", desc: "人氣奶油夾心餅專門店，天神地下街設現烤限定與九州限定口味。", stars: 2, img: "source/thumbs/cafe_07.jpg" },
+        { name: "FUK Coffee", area: "福岡巨蛋", type: "咖啡、布丁", note: "布丁好吃", map: "https://www.google.com/maps/search/?api=1&query=FUK+Coffee+福岡", desc: "福岡發祥人氣咖啡館，巨蛋旁Seaside店評價高，招牌布丁與拉花咖啡。", stars: 3, img: "source/thumbs/cafe_08.jpg" },
+        { name: "Blue Bottle Coffee", area: "警固神社內", type: "咖啡", note: "在神社園區內", map: "https://www.google.com/maps/search/?api=1&query=Blue+Bottle+Coffee+警固神社", desc: "九州首間藍瓶，開在警固神社境內，空間結合神社綠意享精品咖啡。", stars: 2, img: "source/thumbs/cafe_09.jpg" },
+        { name: "B.B.B POTTERS", area: "藥院", type: "生活居家＋咖啡", note: "", map: "https://www.google.com/maps/search/?api=1&query=BBB+POTTERS+藥院", desc: "福岡代表性生活雜貨店，二樓咖啡館可吃蕎麥可麗餅與甜點。", stars: 2, img: "source/thumbs/cafe_10.jpg" },
+        { name: "Good UP Coffee", area: "—", type: "咖啡", note: "", map: "https://www.google.com/maps/search/?api=1&query=Good+UP+Coffee+福岡", desc: "福岡人氣自家烘焙咖啡站，招牌自製紅豆奶油吐司搭濃縮咖啡。", stars: 2, img: "source/thumbs/cafe_11.jpg" },
+        { name: "Coffee County Fukuoka", area: "—", type: "咖啡", note: "", map: "https://www.google.com/maps/search/?api=1&query=Coffee+County+Fukuoka", desc: "久留米發跡的自家焙煎名店，淺焙精品咖啡搭甜點的福岡人氣咖啡館。", stars: 3, img: "source/thumbs/cafe_12.jpg" },
+        { name: "珈琲舎のだ", area: "—", type: "咖啡", note: "", map: "https://www.google.com/maps/search/?api=1&query=珈琲舎のだ+福岡", desc: "1966年創業的福岡代表老舖喫茶，虹吸式咖啡與方形布丁是招牌。", stars: 2, img: "source/thumbs/cafe_13.jpg" }
+      ]
+    },
+    {
+      id: 103, icon: "🛍️", name: "逛街地點",
+      items: [
+        { name: "天神 PARCO", area: "天神", type: "必逛，日牌集中", note: "Urban Research、BEAMS、Journal Standard、ABC-Mart、9090、gelato pique、Snidel（美妝店）；5F 生活雜貨、8F 吉伊卡哇", map: "https://www.google.com/maps/search/?api=1&query=天神PARCO", desc: "天神車站直結，匯集潮流服飾與動漫聯名快閃店的年輕潮流據點。", stars: 3, img: "source/thumbs/shop_01.jpg" },
+        { name: "天神 mina", area: "天神", type: "平價", note: "3COINS+；2F Uniqlo＆GU 大間、2F 二手相機；4F Loft（日用品美妝）；ABC-Mart、Seria", map: "https://www.google.com/maps/search/?api=1&query=天神mina", desc: "集結UNIQLO、GU、LOFT、無印良品的生活採買商場。", stars: 2, img: "source/thumbs/shop_02.jpg" },
+        { name: "One Fukuoka BLDG", area: "天神", type: "很有質感的店／百貨", note: "門口有藝術品「像素樹」；戶外：Snow Peak、Columbia、Mammut；4F 電子寵物 LOVOT", map: "https://www.google.com/maps/search/?api=1&query=ONE+FUKUOKA+BLDG", desc: "2025年新開幕地標，進駐蔦屋書店、NIKE等九州初登場店家。", stars: 3, img: "source/thumbs/shop_03.jpg" },
+        { name: "天神地下街", area: "天神", type: "連通 PARCO、大丸、三越、One Fukuoka BLDG", note: "Salut（生活雜貨）、natural kitchen（鄉村風）、Truffle Bakery、PRESS BUTTER SAND", map: "https://www.google.com/maps/search/?api=1&query=天神地下街", desc: "19世紀歐風石板街道，串連天神各大商場的雨天好逛地下街。", stars: 3, img: "source/thumbs/shop_04.jpg" },
+        { name: "新天町商店街", area: "天神", type: "懷舊、復古喫茶店", note: "附近：岩田屋 IWATAYA（本館／新館）、VIORO、Solaria Plaza", map: "https://www.google.com/maps/search/?api=1&query=新天町商店街", desc: "天神市中心的懷舊拱廊，約90間老鋪與特色專門店聚集。", stars: 2, img: "source/thumbs/shop_05.jpg" },
+        { name: "藥院區", area: "藥院", type: "文青小店、生活雜貨、質感小店、服飾", note: "HIGHTIDE STORE、B.B.B POTTERS", map: "https://www.google.com/maps/search/?api=1&query=藥院+福岡", desc: "文青散步區，散落質感咖啡店與FEELS GOOD等選物雜貨鋪。", stars: 2, img: "source/thumbs/shop_06.jpg" },
+        { name: "博多阪急", area: "博多", type: "精品", note: "有 95 折券", map: "https://www.google.com/maps/search/?api=1&query=博多阪急", desc: "博多車站直結百貨，地下美食街明太子與甜點伴手禮超豐富。", stars: 3, img: "source/thumbs/shop_07.jpg" },
+        { name: "AMU PLAZA 博多", area: "博多", type: "日系、年輕", note: "3F United Arrows、BEAMS；4F Urban Research、Freak's Store；6F 無印良品", map: "https://www.google.com/maps/search/?api=1&query=AMU+PLAZA+博多", desc: "博多車站樓上商場，頂樓燕之杜廣場與くうてん美食街必逛。", stars: 3, img: "source/thumbs/shop_08.jpg" },
+        { name: "KITTE 博多", area: "博多", type: "美食：牛腸鍋、水炊、拉麵", note: "4F Seria 百元商店（¥110）", map: "https://www.google.com/maps/search/?api=1&query=KITTE+博多", desc: "博多車站直結商場，樓下連通マイング92間伴手禮名店。", stars: 2, img: "source/thumbs/shop_09.jpg" },
+        { name: "博多運河城", area: "博多", type: "戶外用品", note: "TNF、Tiger、Calvin Klein、Columbia；3F 彩妝服飾、Alpen FUKUOKA、MUJI", map: "https://www.google.com/maps/search/?api=1&query=博多運河城", desc: "運河環繞的都市劇場，每天上演噴水秀與拉麵競技場。", stars: 3, img: "source/thumbs/shop_10.jpg" }
+      ]
+    },
+    {
+      id: 104, icon: "⛩️", name: "景點",
+      items: [
+        { name: "櫛田神社＋川端通商店街", area: "博多", type: "神社＋商店街", note: "大東園本店就在附近", map: "https://www.google.com/maps/search/?api=1&query=櫛田神社+福岡", desc: "博多千年總鎮守，可看山笠飾山，再逛相鄰的川端商店街吃小吃", stars: 3, img: "source/thumbs/spot_01.jpg" },
+        { name: "警固神社", area: "天神", type: "以消災避邪聞名，位在天神商圈", note: "園區內有 Blue Bottle", map: "https://www.google.com/maps/search/?api=1&query=警固神社", desc: "天神鬧區正中央的古社，境內有免費足湯可歇腳", stars: 2, img: "source/thumbs/spot_02.jpg" },
+        { name: "福岡城遺跡", area: "大濠公園、舞鶴公園", type: "天守台、市美術館", note: "園區內有很多咖啡廳、日式庭園", map: "https://www.google.com/maps/search/?api=1&query=福岡城跡", desc: "黑田長政築城遺跡，登天守台可一覽福岡市景與春日櫻花", stars: 2, img: "source/thumbs/spot_03.jpg" },
+        { name: "福岡市海濱公園", area: "—", type: "沙灘＋福岡塔", note: "", map: "https://www.google.com/maps/search/?api=1&query=福岡市海濱公園", desc: "博多灣人工白沙灘搭配日本最高海濱塔，可登塔看海景夕陽", stars: 3, img: "source/thumbs/spot_04.jpg" },
+        { name: "糸島 夫婦岩", area: "糸島", type: "海邊鳥居", note: "", map: "https://www.google.com/maps/search/?api=1&query=桜井二見ヶ浦+糸島", desc: "海中白鳥居配夫婦岩，日本渚百選的夕陽絕景拍照地", stars: 3, img: "source/thumbs/spot_05.jpg", imgPos: "50% 40%" },
+        { name: "太宰府天滿宮", area: "太宰府", type: "神社＋參道", note: "", map: "https://www.google.com/maps/search/?api=1&query=太宰府天満宮", desc: "全國天滿宮總本宮，拜學問之神順逛參道美食與梅枝餅", stars: 3, img: "source/thumbs/spot_06.jpg" },
+        { name: "太宰府天滿宮 水籤", area: "太宰府", type: "神社水籤", note: "", map: "https://www.google.com/maps/search/?api=1&query=太宰府天満宮+水みくじ", desc: "籤紙泡水才浮現文字，旅客最常推薦的特色體驗", stars: 2, img: "source/thumbs/spot_07.jpg" },
+        { name: "柳川遊船", area: "柳川", type: "搖櫓遊船", note: "", map: "https://www.google.com/maps/search/?api=1&query=柳川+川下り", desc: "搭どんこ舟約60分遊掘割水道，聽船夫唱歌賞水鄉風情", stars: 3, img: "source/thumbs/spot_08.jpg" },
+        { name: "中洲屋台", area: "中洲", type: "屋台小吃", note: "多數18:00後營業至深夜，現金為主，週日多休", map: "https://www.google.com/maps/search/?api=1&query=中洲+屋台+福岡", desc: "那珂川畔整排燈籠路邊攤，吃豚骨拉麵配啤酒最有福岡味。", stars: 3, img: "source/thumbs/spot_09.jpg" },
+        { name: "福岡塔", area: "百道濱", type: "觀景塔", note: "約9:30-22:00，展望台門票成人約800日圓", map: "https://www.google.com/maps/search/?api=1&query=福岡タワー", desc: "234公尺海濱地標，登頂看博多灣與市區夜景超遼闊。", stars: 3, img: "source/thumbs/spot_10.jpg" },
+        { name: "大濠公園", area: "大濠公園", type: "水景公園", note: "全天開放免費，鄰近福岡城跡與美術館", map: "https://www.google.com/maps/search/?api=1&query=大濠公園", desc: "繞大池散步慢跑的市民綠洲，橋景與落日倒影很療癒。", stars: 2, img: "source/thumbs/spot_11.jpg" },
+        { name: "福岡 PayPay 巨蛋", area: "福岡巨蛋", type: "巨蛋球場", note: "軟銀鷹主場，有比賽或演唱會才熱鬧，可參加導覽", map: "https://www.google.com/maps/search/?api=1&query=福岡PayPayドーム", desc: "日本首座開合式屋頂巨蛋，看鷹隊球賽或演唱會的聖地。", stars: 2, img: "source/thumbs/spot_12.jpg" },
+        { name: "博多舊市街 承天寺・東長寺", area: "博多", type: "古寺街區", note: "寺院境內免費，東長寺有日本最大木造坐佛可看", map: "https://www.google.com/maps/search/?api=1&query=東長寺+博多", desc: "烏龍麵發源地承天寺加東長寺大佛，步行逛博多千年寺町。", stars: 2, img: "source/thumbs/spot_13.jpg" },
+        { name: "柳橋連合市場", area: "柳橋", type: "傳統市場", note: "約8:00-17:00，週日公休，約35家店", map: "https://www.google.com/maps/search/?api=1&query=柳橋連合市場", desc: "被稱博多廚房的百年市場，明太子與玄界灘鮮魚現買現嚐。", stars: 2, img: "source/thumbs/spot_14.jpg" },
+        { name: "能古島", area: "能古島", type: "海島花公園", note: "姪濱渡輪約10分到島，再轉巴士上公園；園內9:00-17:30，門票約1200日圓", map: "https://www.google.com/maps/search/?api=1&query=のこのしまアイランドパーク", desc: "搭渡輪上小島，整片花田襯博多灣海景，四季輪流開花超好拍。", stars: 3, img: "source/thumbs/spot_15.jpg" },
+        { name: "海之中道海濱公園", area: "海之中道", type: "海濱公園", note: "占地約350公頃，可租單車12公里環騎；設摩天輪與動物區，建議安排半天", map: "https://www.google.com/maps/search/?api=1&query=海の中道海浜公園", desc: "超大國營公園，春天粉蝶花配摩天輪成片盛開，還能騎車玩動物區。", stars: 3, img: "source/thumbs/spot_16.jpg" },
+        { name: "宮地嶽神社", area: "福津", type: "神社", note: "每年僅2月、10月數日可見「光之道」夕陽；觀覽席需預約", map: "https://www.google.com/maps/search/?api=1&query=宮地嶽神社", desc: "巨大注連繩的開運神社，2月、10月夕陽沿參道直落大海成「光之道」。", stars: 3, img: "source/thumbs/spot_17.jpg" },
+        { name: "門司港懷舊區", area: "北九州", type: "復古港街", note: "復原的門司港車站為焦點；展望室31樓看關門海峽夜景；名物烤咖哩", map: "https://www.google.com/maps/search/?api=1&query=門司港レトロ", desc: "明治大正紅磚洋樓港街，吃名物烤咖哩、登展望室眺關門海峽。", stars: 2, img: "source/thumbs/spot_18.jpg" }
+      ]
+    }
+  ];
+
+  const rescuePhrases = [
+    { jp: "すみません。", zh: "不好意思／請問", kana: "すみません", romaji: "sumimasen" },
+    { jp: "日本語があまりわかりません。", zh: "我不太懂日文", kana: "にほんごが あまり わかりません", romaji: "nihongo ga amari wakarimasen" },
+    { jp: "もう一度、ゆっくりお願いします。", zh: "請再慢慢說一次", kana: "もういちど、ゆっくり おねがいします", romaji: "mou ichido, yukkuri onegai shimasu" },
+    { jp: "ここに行きたいです。", zh: "我想去這裡", kana: "ここに いきたいです", romaji: "koko ni ikitai desu" },
+    { jp: "この電車で合っていますか？", zh: "搭這班電車對嗎？", kana: "この でんしゃで あっていますか", romaji: "kono densha de atte imasu ka" },
+    { jp: "おすすめは何ですか？", zh: "有什麼推薦？", kana: "おすすめは なんですか", romaji: "osusume wa nan desu ka" },
+    { jp: "これをください。", zh: "請給我這個", kana: "これを ください", romaji: "kore o kudasai" },
+    { jp: "お会計お願いします。", zh: "麻煩結帳", kana: "おかいけい おねがいします", romaji: "okaikei onegai shimasu" },
+    { jp: "トイレはどこですか？", zh: "廁所在哪裡？", kana: "といれは どこですか", romaji: "toire wa doko desu ka" },
+    { jp: "助けてください。", zh: "請幫幫我", kana: "たすけて ください", romaji: "tasukete kudasai" }
+  ];
+
+  const pronunciationTips = [
+    "<code>ou</code>、<code>uu</code> 通常是長音，例如「空港」<code>kuukou</code>，母音要稍微拉長。",
+    "<code>っ</code> 是促音，要停頓一下，例如「切符」<code>kippu</code>。",
+    "羅馬拼音中的 <code>r</code> 介於中文的「ㄌ」與輕彈舌之間，不必刻意捲舌。",
+    "日文的「は」當助詞時念作 <code>wa</code>，例如 <code>これは</code> 念 <code>kore wa</code>。"
+  ];
+
+  // ---------- 狀態 ----------
+  const LS_KEY = "fukuoka-vocab-learned-v1";
+  const LS_STAR_KEY = "fukuoka-vocab-starred-v1";
+  const LS_BUCKET_VISITED_KEY = "fukuoka-bucket-visited-v1";
+  const LS_BUCKET_STAR_KEY = "fukuoka-bucket-starred-v1";
+  let learned = {};
+  let starred = {};
+  let visited = {};
+  let bucketStarred = {};
+  try { learned = JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch (e) { learned = {}; }
+  try { starred = JSON.parse(localStorage.getItem(LS_STAR_KEY)) || {}; } catch (e) { starred = {}; }
+  try { visited = JSON.parse(localStorage.getItem(LS_BUCKET_VISITED_KEY)) || {}; } catch (e) { visited = {}; }
+  try { bucketStarred = JSON.parse(localStorage.getItem(LS_BUCKET_STAR_KEY)) || {}; } catch (e) { bucketStarred = {}; }
+
+  let mode = "bucket"; // 只保留口袋頁面
+  let activeCatId = categories[0].id;
+  let activeBucketCatId = bucketCategories[0].id;
+  let onlyUnlearned = false;
+  let onlyStarred = false;
+  let searchQuery = "";
+  let activeZone = null; // null = 全部
+
+  // 把細碎的地點名稱歸到大區域，方便篩選
+  const ZONE_KEYWORDS = ["天神", "博多", "藥院", "柳橋", "中央區", "大濠公園", "中洲", "百道濱", "糸島", "太宰府", "柳川", "福岡巨蛋"];
+
+  function zoneOf(area) {
+    if (!area || area === "—") return "其他";
+    if (/警固/.test(area)) return "天神";      // 警固神社在天神商圈
+    if (/舞鶴/.test(area)) return "大濠公園";
+    for (const z of ZONE_KEYWORDS) {
+      if (area.indexOf(z) !== -1) return z;
+    }
+    return "其他";
+  }
+
+  // 取出某分類裡出現過的區域＋各自筆數，依首次出現順序排列
+  function zonesOf(cat) {
+    const order = [];
+    const counts = {};
+    cat.items.forEach(item => {
+      const z = zoneOf(item.area);
+      if (counts[z] === undefined) { counts[z] = 0; order.push(z); }
+      counts[z]++;
+    });
+    return order.map(z => ({ zone: z, count: counts[z] }));
+  }
+
+  // 各模式的設定：分類資料、是否有搜尋、是否有進度列
+  const modeConfig = {
+    vocab: {
+      cats: () => categories,
+      search: true,
+      searchPlaceholder: "搜尋中文、日文或羅馬拼音…",
+      statusBar: true,
+      progressLabel: "已學會",
+      starLabel: "只看收藏",
+      showUnlearned: true
+    },
+    bucket: {
+      cats: () => bucketCategories,
+      search: true,
+      searchPlaceholder: "搜尋店名、區域或類型…",
+      statusBar: true,
+      progressLabel: "已去過",
+      starLabel: "只看想去",
+      showUnlearned: false
+    }
+  };
+
+  function currentCategories() {
+    return modeConfig[mode].cats();
+  }
+
+  function currentActiveCatId() {
+    if (mode === "vocab") return activeCatId;
+    if (mode === "bucket") return activeBucketCatId;
+    return null;
+  }
+
+  function setActiveCatId(id) {
+    if (mode === "vocab") activeCatId = id;
+    else if (mode === "bucket") activeBucketCatId = id;
+  }
+
+  function saveLearned() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(learned)); } catch (e) {}
+  }
+
+  function saveStarred() {
+    try { localStorage.setItem(LS_STAR_KEY, JSON.stringify(starred)); } catch (e) {}
+  }
+
+  function saveVisited() {
+    try { localStorage.setItem(LS_BUCKET_VISITED_KEY, JSON.stringify(visited)); } catch (e) {}
+  }
+
+  function saveBucketStarred() {
+    try { localStorage.setItem(LS_BUCKET_STAR_KEY, JSON.stringify(bucketStarred)); } catch (e) {}
+  }
+
+  function itemKey(catId, idx) {
+    return "c" + catId + "-i" + idx;
+  }
+
+  function subKey(catId, idx, subIdx) {
+    return "c" + catId + "-i" + idx + "-s" + subIdx;
+  }
+
+  // ---------- DOM 參照 ----------
+  const tabsEl = document.getElementById("tabs");
+  const mainEl = document.getElementById("main");
+  const searchEl = document.getElementById("search");
+  const searchClearEl = document.getElementById("searchClear");
+  const statusBarEl = document.getElementById("statusBar");
+  const progressTextEl = document.getElementById("progressText");
+  const onlyUnlearnedEl = document.getElementById("onlyUnlearned");
+  const onlyStarredEl = document.getElementById("onlyStarred");
+  const onlyUnlearnedLabelEl = onlyUnlearnedEl.closest("label");
+  const starLabelTextEl = document.querySelector(".star-label-text");
+  const starLabelEl = onlyStarredEl.closest("label");
+  const searchWrapEl = document.querySelector(".search-wrap");
+  const modeSwitchEl = document.getElementById("modeSwitch");
+  const zoneBarEl = document.getElementById("zoneBar");
+
+  // ---------- 模式切換 ----------
+  modeSwitchEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".nav-btn");
+    if (!btn) return;
+    mode = btn.dataset.mode;
+    modeSwitchEl.querySelectorAll(".nav-btn").forEach(b => {
+      b.classList.toggle("active", b === btn);
+    });
+    searchQuery = "";
+    searchEl.value = "";
+    searchClearEl.style.display = "none";
+    onlyStarred = false;
+    onlyStarredEl.checked = false;
+    onlyUnlearned = false;
+    onlyUnlearnedEl.checked = false;
+    activeZone = null;
+    applyModeChrome();
+    render();
+    window.scrollTo({ top: 0, behavior: "auto" });
+  });
+
+  // ---------- 區域篩選 ----------
+  function renderZoneBar() {
+    // 只有口袋清單、且不在搜尋狀態時才顯示
+    if (mode !== "bucket" || searchQuery) {
+      zoneBarEl.style.display = "none";
+      zoneBarEl.innerHTML = "";
+      return;
+    }
+    const cat = bucketCategories.find(c => c.id === activeBucketCatId) || bucketCategories[0];
+    const zones = zonesOf(cat);
+    // 只有一個區域就沒必要顯示篩選
+    if (zones.length < 2) {
+      zoneBarEl.style.display = "none";
+      zoneBarEl.innerHTML = "";
+      return;
+    }
+    zoneBarEl.style.display = "flex";
+    zoneBarEl.innerHTML =
+      '<button class="zone-chip' + (activeZone === null ? ' active' : '') + '" data-zone="">' +
+        '全部<span class="zone-count">' + cat.items.length + '</span></button>' +
+      zones.map(z => (
+        '<button class="zone-chip' + (activeZone === z.zone ? ' active' : '') + '" data-zone="' + escapeHtml(z.zone) + '">' +
+          escapeHtml(z.zone) + '<span class="zone-count">' + z.count + '</span></button>'
+      )).join("");
+  }
+
+  zoneBarEl.addEventListener("click", (e) => {
+    const chip = e.target.closest(".zone-chip");
+    if (!chip) return;
+    activeZone = chip.dataset.zone || null;
+    render();
+  });
+
+  // 依模式調整搜尋框、篩選列的顯示
+  function applyModeChrome() {
+    const cfg = modeConfig[mode];
+    searchWrapEl.style.display = cfg.search ? "block" : "none";
+    if (cfg.search) searchEl.placeholder = cfg.searchPlaceholder;
+    onlyUnlearnedLabelEl.style.display = cfg.showUnlearned ? "flex" : "none";
+    if (cfg.starLabel) starLabelTextEl.textContent = cfg.starLabel;
+    starLabelEl.style.display = cfg.statusBar ? "flex" : "none";
+  }
+
+  // ---------- 建立 Tabs ----------
+  function renderTabs() {
+    const cats = currentCategories();
+    if (!cats.length) {
+      tabsEl.style.display = "none";
+      tabsEl.innerHTML = "";
+      return;
+    }
+    tabsEl.style.display = "flex";
+    const activeId = currentActiveCatId();
+    const cfg = modeConfig[mode];
+    tabsEl.innerHTML = cats.map(cat => (
+      '<button class="tab-btn' + (cat.id === activeId && !searchQuery ? ' active' : '') + '" data-cat="' + cat.id + '">' +
+        (cfg.tabLabel ? cfg.tabLabel(cat) : '<span class="nav-icon">' + cat.icon + '</span>' + cat.name) +
+      '</button>'
+    )).join("");
+  }
+
+  tabsEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab-btn");
+    if (!btn) return;
+    setActiveCatId(Number(btn.dataset.cat));
+    searchQuery = "";
+    searchEl.value = "";
+    searchClearEl.style.display = "none";
+    activeZone = null;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // ---------- 卡片 HTML ----------
+  function cardHtml(item, catId, idx, showChip) {
+    const key = itemKey(catId, idx);
+    const isLearned = !!learned[key];
+    const isStarred = !!starred[key];
+    const cat = categories.find(c => c.id === catId);
+    return (
+      '<div class="card' + (isLearned ? ' learned' : '') + (isStarred ? ' starred' : '') + '" data-key="' + key + '">' +
+        (showChip && cat ? '<span class="cat-chip">' + cat.icon + ' ' + cat.name + '</span><br>' : '') +
+        '<div class="jp">' + item.jp + '</div>' +
+        '<div class="meta"><span class="kana">' + item.kana + '</span><span class="dot">•</span><span class="romaji">' + item.romaji + '</span></div>' +
+        '<div class="zh">' + item.zh + '</div>' +
+        '<button class="star-toggle" data-key="' + key + '" aria-label="收藏"></button>' +
+        '<button class="learn-toggle" data-key="' + key + '" aria-label="標記已學會"></button>' +
+      '</div>'
+    );
+  }
+
+  // ---------- 口袋清單卡片 HTML ----------
+  function bucketCardHtml(item, catId, idx, showChip) {
+    const key = itemKey(catId, idx);
+    const isVisited = !!visited[key];
+    const isStarred = !!bucketStarred[key];
+    const cat = bucketCategories.find(c => c.id === catId);
+    const tags = [item.area, item.type].filter(t => t && t !== "—");
+    const rating = item.stars
+      ? '<div class="rating" aria-label="網路推薦 ' + item.stars + ' 顆星">' +
+          '<span class="on">' + "★".repeat(item.stars) + '</span>' +
+          '<span class="off">' + "★".repeat(3 - item.stars) + '</span>' +
+        '</div>'
+      : '';
+    return (
+      '<div class="card place' + (item.img ? '' : ' no-img') + (isVisited ? ' learned' : '') + (isStarred ? ' starred' : '') + '" data-key="' + key + '">' +
+        (item.img ? '<img class="place-thumb" src="' + escapeHtml(item.img) + '"' + (item.imgPos ? ' style="object-position:' + escapeHtml(item.imgPos) + '"' : '') + ' alt="' + escapeHtml(item.name) + '" loading="lazy">' : '') +
+        (showChip && cat ? '<span class="cat-chip">' + cat.icon + ' ' + cat.name + '</span><br>' : '') +
+        '<div class="jp">' + escapeHtml(item.name) + '</div>' +
+        rating +
+        (item.desc ? '<div class="desc">' + escapeHtml(item.desc) + '</div>' : '') +
+        (tags.length ? '<div class="tags">' + tags.map(t => '<span class="tag">' + escapeHtml(t) + '</span>').join("") + '</div>' : '') +
+        (item.note ? '<div class="note">' + escapeHtml(item.note) + '</div>' : '') +
+        mapLinkHtml(item.map) +
+        '<button class="star-toggle" data-key="' + key + '" aria-label="想去"></button>' +
+        '<button class="learn-toggle" data-key="' + key + '" aria-label="已經去過"></button>' +
+      '</div>'
+    );
+  }
+
+  // 地圖 icon（新視窗開啟，手機會直接跳 Google Maps App）
+  function mapLinkHtml(url) {
+    if (!url) return '';
+    return '<a class="map-link" href="' + escapeHtml(url) +
+      '" target="_blank" rel="noopener noreferrer" title="在 Google 地圖開啟" aria-label="在 Google 地圖開啟">📍</a>';
+  }
+
+  // ---------- 渲染主內容 ----------
+  function render() {
+    renderTabs();
+    renderZoneBar();
+
+    if (mode === "vocab") renderVocab();
+    else if (mode === "bucket") renderBucket();
+  }
+
+  function renderVocab() {
+    let listHtml = "";
+    let totalCount = 0;
+    let learnedCount = 0;
+
+    if (searchQuery) {
+      // 全類別搜尋
+      const q = searchQuery.toLowerCase();
+      let results = [];
+      categories.forEach(cat => {
+        cat.items.forEach((item, idx) => {
+          const hay = (item.jp + item.zh + item.kana + item.romaji).toLowerCase();
+          if (hay.includes(q)) {
+            results.push({ item, catId: cat.id, idx });
+          }
+        });
+      });
+
+      totalCount = results.length;
+      results.forEach(r => {
+        if (learned[itemKey(r.catId, r.idx)]) learnedCount++;
+      });
+
+      if (onlyUnlearned) {
+        results = results.filter(r => !learned[itemKey(r.catId, r.idx)]);
+      }
+      if (onlyStarred) {
+        results = results.filter(r => !!starred[itemKey(r.catId, r.idx)]);
+      }
+
+      if (results.length === 0) {
+        listHtml = '<div class="empty-hint">沒有符合「' + escapeHtml(searchQuery) + '」的單字</div>';
+      } else {
+        listHtml = '<div class="section-title">搜尋結果（' + results.length + '）</div>' +
+          results.map(r => cardHtml(r.item, r.catId, r.idx, true)).join("");
+      }
+
+      statusBarEl.style.display = totalCount > 0 ? "flex" : "none";
+    } else {
+      const cat = categories.find(c => c.id === activeCatId) || categories[0];
+      totalCount = cat.items.length;
+      cat.items.forEach((item, idx) => {
+        if (learned[itemKey(cat.id, idx)]) learnedCount++;
+      });
+
+      let items = cat.items.map((item, idx) => ({ item, idx }));
+      if (onlyUnlearned) {
+        items = items.filter(x => !learned[itemKey(cat.id, x.idx)]);
+      }
+      if (onlyStarred) {
+        items = items.filter(x => !!starred[itemKey(cat.id, x.idx)]);
+      }
+
+      listHtml = '<div class="section-title">' + cat.icon + ' ' + cat.name + '</div>' +
+        (items.length === 0
+          ? '<div class="empty-hint">' + (onlyStarred ? '這個分類還沒有收藏的單字 ☆' : '這個分類全部都已學會了 🎉') + '</div>'
+          : items.map(x => cardHtml(x.item, cat.id, x.idx, false)).join(""));
+
+      statusBarEl.style.display = "flex";
+    }
+
+    mainEl.innerHTML = listHtml;
+    progressTextEl.textContent = "已學會 " + learnedCount + " / " + totalCount;
+  }
+
+  function renderBucket() {
+    let listHtml = "";
+    let totalCount = 0;
+    let visitedCount = 0;
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      let results = [];
+      bucketCategories.forEach(cat => {
+        cat.items.forEach((item, idx) => {
+          const hay = (item.name + item.area + item.type + item.note).toLowerCase();
+          if (hay.includes(q)) {
+            results.push({ item, catId: cat.id, idx });
+          }
+        });
+      });
+
+      totalCount = results.length;
+      results.forEach(r => {
+        if (visited[itemKey(r.catId, r.idx)]) visitedCount++;
+      });
+
+      if (onlyStarred) {
+        results = results.filter(r => !!bucketStarred[itemKey(r.catId, r.idx)]);
+      }
+
+      if (results.length === 0) {
+        listHtml = '<div class="empty-hint">沒有符合「' + escapeHtml(searchQuery) + '」的地點</div>';
+      } else {
+        listHtml = '<div class="section-title">搜尋結果（' + results.length + '）</div>' +
+          results.map(r => bucketCardHtml(r.item, r.catId, r.idx, true)).join("");
+      }
+
+      statusBarEl.style.display = totalCount > 0 ? "flex" : "none";
+    } else {
+      const cat = bucketCategories.find(c => c.id === activeBucketCatId) || bucketCategories[0];
+
+      let items = cat.items.map((item, idx) => ({ item, idx }));
+      // 區域篩選
+      if (activeZone) {
+        items = items.filter(x => zoneOf(x.item.area) === activeZone);
+      }
+
+      // 進度以「目前篩選範圍」為分母，比較符合直覺
+      totalCount = items.length;
+      items.forEach(x => {
+        if (visited[itemKey(cat.id, x.idx)]) visitedCount++;
+      });
+
+      if (onlyStarred) {
+        items = items.filter(x => !!bucketStarred[itemKey(cat.id, x.idx)]);
+      }
+
+      const title = cat.icon + ' ' + cat.name + (activeZone ? '｜' + escapeHtml(activeZone) : '');
+      listHtml = '<div class="section-title">' + title + '</div>' +
+        (items.length === 0
+          ? '<div class="empty-hint">' + (onlyStarred ? '這個範圍還沒有想去的地點 ☆' : '這個區域沒有地點') + '</div>'
+          : items.map(x => bucketCardHtml(x.item, cat.id, x.idx, false)).join(""));
+
+      statusBarEl.style.display = "flex";
+    }
+
+    mainEl.innerHTML = listHtml;
+    progressTextEl.textContent = "已去過 " + visitedCount + " / " + totalCount;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  // ---------- 事件：卡片打勾／收藏 ----------
+  mainEl.addEventListener("click", (e) => {
+    const learnBtn = e.target.closest(".learn-toggle");
+    if (learnBtn) {
+      const key = learnBtn.dataset.key;
+      if (mode === "vocab") {
+        learned[key] = !learned[key];
+        saveLearned();
+      } else if (mode === "bucket") {
+        visited[key] = !visited[key];
+        saveVisited();
+      }
+      render();
+      return;
+    }
+    const starBtn = e.target.closest(".star-toggle");
+    if (starBtn) {
+      const key = starBtn.dataset.key;
+      if (mode === "vocab") {
+        starred[key] = !starred[key];
+        saveStarred();
+      } else if (mode === "bucket") {
+        bucketStarred[key] = !bucketStarred[key];
+        saveBucketStarred();
+      }
+      render();
+      return;
+    }
+  });
+
+  // ---------- 事件：搜尋 ----------
+  searchEl.addEventListener("input", () => {
+    searchQuery = searchEl.value.trim();
+    searchClearEl.style.display = searchQuery ? "block" : "none";
+    render();
+  });
+
+  searchClearEl.addEventListener("click", () => {
+    searchEl.value = "";
+    searchQuery = "";
+    searchClearEl.style.display = "none";
+    render();
+    searchEl.focus();
+  });
+
+  // ---------- 事件：只看未學會 ----------
+  onlyUnlearnedEl.addEventListener("change", () => {
+    onlyUnlearned = onlyUnlearnedEl.checked;
+    render();
+  });
+
+  onlyStarredEl.addEventListener("change", () => {
+    onlyStarred = onlyStarredEl.checked;
+    render();
+  });
+
+  // ---------- 救命卡 Modal ----------
+  const fabBtn = document.getElementById("fabBtn");
+  const modalBackdrop = document.getElementById("modalBackdrop");
+  const modalClose = document.getElementById("modalClose");
+  const modalBody = document.getElementById("modalBody");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalTabsBtns = document.querySelectorAll(".modal-tabs button");
+  let modalMode = "rescue";
+
+  function renderModal() {
+    if (modalMode === "rescue") {
+      modalTitle.textContent = "快速救命卡";
+      modalBody.innerHTML = rescuePhrases.map((p, i) => (
+        '<div class="rescue-item">' +
+          '<div class="num">' + (i + 1) + '</div>' +
+          '<div class="jp">' + p.jp + '</div>' +
+          '<div class="kana">' + p.kana + '</div>' +
+          '<div class="zh">' + p.zh + '</div>' +
+          '<div class="romaji">' + p.romaji + '</div>' +
+        '</div>'
+      )).join("");
+    } else {
+      modalTitle.textContent = "發音小提醒";
+      modalBody.innerHTML = pronunciationTips.map(tip => (
+        '<div class="tip-item">' + tip + '</div>'
+      )).join("");
+    }
+    modalTabsBtns.forEach(b => b.classList.toggle("active", b.dataset.modal === modalMode));
+  }
+
+  fabBtn.addEventListener("click", () => {
+    modalMode = "rescue";
+    renderModal();
+    modalBackdrop.classList.add("open");
+  });
+
+  modalClose.addEventListener("click", () => {
+    modalBackdrop.classList.remove("open");
+  });
+
+  modalBackdrop.addEventListener("click", (e) => {
+    if (e.target === modalBackdrop) modalBackdrop.classList.remove("open");
+  });
+
+  modalTabsBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      modalMode = btn.dataset.modal;
+      renderModal();
+    });
+  });
+
+  // ---------- 初始化 ----------
+  applyModeChrome();
+  render();
+</script>
+</body>
+</html>
